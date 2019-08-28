@@ -8,7 +8,7 @@ class GithubRepoScript {
     const token = 'd3142837a321306fde94c59774009c8ab9eeeaac'
 
     this.gqlClient = new GraphQLClient(
-      endpoint, 
+      endpoint,
       {
         headers: {
           Authorization: 'bearer ' + token,
@@ -16,12 +16,11 @@ class GithubRepoScript {
       }
     )
 
+    // configurations
+    this.pagesPerUpdate = 20
+
     // Fields
     this.fetching = false
-    this.previousEndCursor = null // location of start
-
-    // Data Fields
-    this.rawStargazerData = new Map()
 
   }
 
@@ -41,20 +40,100 @@ class GithubRepoScript {
   stopFetching = () => this.fetching = false
 
   /**
-   * 
+   * reset class fields to default
    */
-  fetchStargazerData = async () => {
-    this.startFetching()
+  reset = () => {
+    this.fetching = false  }
 
-    // define the graphql queryr
+  /**
+   * fetch repository low-level data
+   * @param onUpdate function that will be called when a new data update is avaiable
+   * @param onFinish function that will be called when fetching is finished
+   * @param onProgress function that will be called when progress is updated
+   * @returns Object that contains statistics
+   */
+  fetchRepositoryData = async (onUpdate, onFinish, onProgress) => {
+    const owner = 'vesoft-inc'
+    const name = 'nebula'
+
+    const variables = {
+      owner: owner,
+      name: name,
+    }
+
+    // define the graphql query
     const query = /* GraphQL */ `
-      query getStargazers($previousEndCursor: String){
-        # repository(owner: "CyC2018", name: "CS-Notes") {
-        repository(owner: "vesoft-inc", name: "nebula") {
+      query getRepository($owner: String!, $name: String!){
+        repository(owner: $owner, name: $name) {
+          owner {
+            login
+          }
           name
           createdAt
-          stargazers(first: 100, after: $previousEndCursor) {
+        }
+      }
+    `
+
+    // update progress tracking
+    if (onProgress) {
+      onProgress(77)
+    }
+
+    const data = await this.gqlClient.request(query, variables)
+    const formattedData = {
+      owner: data.repository.owner.login,
+      name: data.repository.name,
+      createdAt: data.repository.createdAt,
+    }
+
+    // update progress tracking
+    if (onProgress) {
+      onProgress(100)
+    }
+
+    if (onFinish) {
+      onFinish(formattedData)
+    }
+
+    return formattedData
+  }
+
+  /**
+   * fetch stargazers data
+   * @param onUpdate function that will be called when a new data update is avaiable
+   * @param onFinish function that will be called when fetching is finished
+   * @param onProgress function that will be called when progress is updated
+   * @returns Object that contains statistics
+   */
+  fetchStargazerData = async (onUpdate, onFinish, onProgress) => {
+    this.startFetching()
+
+    // const owner = 'graphql-go'
+    // const name = 'graphql'
+    const owner = 'vesoft-inc'
+    const name = 'nebula'
+
+    const preparationVariables = {
+      owner: owner,
+      name: name,
+    }
+
+    // define the graphql query
+    const preparationQuery = /* GraphQL */ `
+      query prepareStargazers($owner: String!, $name: String!){
+        repository(owner: $owner, name: $name) {
+          createdAt
+          stargazers(first: 0) {
             totalCount
+          }
+        }
+      }
+    `
+    const query = /* GraphQL */ `
+      query getStargazers($owner: String!, $name: String!, $previousEndCursor: String){
+        repository(owner: $owner, name: $name) {
+          createdAt
+          stargazers(first: 100, after: $previousEndCursor) {
             pageInfo {
               endCursor
               startCursor
@@ -67,32 +146,77 @@ class GithubRepoScript {
       }
     `
 
+    // local variables
+    const formattedData = new Map()
+    let pageIndex = 0
+    let totalToFetch = 0
+    let numberFetched = 0
+    let previousEndCursor = null
+    const addNumberFetched = () => numberFetched += 1
+    const getProgress = (c, t) => Math.floor(c / t * 100)
+
+    // Preparation query
+    const preparationData = await this.gqlClient.request(preparationQuery, preparationVariables)
+
+    // Statistics variables
+    totalToFetch = preparationData.repository.stargazers.totalCount
+    const createdAt = preparationData.repository.createdAt
+
+
     // data traversal, 100 edges/request
     do {
       const variables = {
-        previousEndCursor: this.previousEndCursor
+        owner: owner,
+        name: name,
+        previousEndCursor: previousEndCursor
       }
       // query for data
       const data = await this.gqlClient.request(query, variables)
 
-      // variable used for structuring data
-      // const dateCreated = new Date(data.repository.createdAt.slice(0,10)).getTime()
+      // update variables
 
       // destructure data from the JSON
       data.repository.stargazers.edges.forEach(edge => {
         const date = new Date(edge.starredAt.slice(0,10)).getTime() // ISO-8601 encoded UTC date string
-        if (!this.rawStargazerData.has(date)) {
-          this.rawStargazerData.set(date, 1)
+        if (!formattedData.has(date)) {
+          formattedData.set(date, 1)
         } else {
-          this.rawStargazerData.set(date, this.rawStargazerData.get(date) + 1)
+          formattedData.set(date, formattedData.get(date) + 1)
         }
+        // update progress tracking
+        addNumberFetched()
       })
 
-      // track class-level variables
-      this.previousEndCursor = data.repository.stargazers.pageInfo.endCursor // pagination
-    } while (this.previousEndCursor !== null)
+      // update progress tracking
+      if (onProgress) {
+        onProgress(getProgress(numberFetched, totalToFetch))
+      }
 
-    return this.rawStargazerData
+      // track class-level variables
+      previousEndCursor = data.repository.stargazers.pageInfo.endCursor // pagination
+
+      // update pageIndex
+      pageIndex += 1
+
+      // onUpdate callback if existed
+      if (onUpdate && pageIndex % this.pagesPerUpdate === 0) {
+        onUpdate(formattedData)
+      }
+    } while (previousEndCursor !== null)
+
+    if (onUpdate) {
+      onUpdate(formattedData)
+    }
+    if (onFinish) {
+      onFinish({
+        totalStar: totalToFetch,
+        createdAt,
+      })
+    }
+
+    this.reset()
+
+    return formattedData
   }
 }
 

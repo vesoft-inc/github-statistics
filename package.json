@@ -7,10 +7,13 @@
     "antd": "^3.22.0",
     "graphql": "^14.5.0",
     "graphql-request": "^1.8.2",
+    "lodash": "^4.17.15",
     "react": "^16.9.0",
     "react-dom": "^16.9.0",
+    "react-redux": "^7.1.1",
     "react-scripts": "3.1.1",
-    "recharts": "^1.7.1"
+    "recharts": "^1.7.1",
+    "redux": "^4.0.4"
   },
   "scripts": {
     "start": "react-scripts start",
@@ -35,6 +38,7 @@
   },
   "devDependencies": {
     "eslint": "^6.2.2",
-    "eslint-plugin-react": "^7.14.3"
+    "eslint-plugin-react": "^7.14.3",
+    "redux-devtools": "^3.5.0"
   }
 }

@@ -19,3 +19,9 @@
   font-size: calc(10px + 2vmin);
   color: white;
 }
+
+.Section-div {
+  width: 90%;
+  margin: auto;
+  /* display: block; */
+}
