@@ -29,18 +29,22 @@ class GithubSection extends React.Component {
   })
 
   _fetchStargazerData = () => ({
-    // this.setState({ starLoading: true, starProgress: 0 })
-    // this.GithubRepoScript.fetchStargazerData(
-    //   data => this.setState({ starData: data, starReady: true, starLoading: true }),
-    //   stats => this.setState(prevState => ({ starStats: {...prevState.starStats, ...stats}, starLoading: false })),
-    //   progress => this.setState({ starProgress: progress })
-    // )
     type: this.GithubRepoScript.fetchStargazerData,
     onUpdate: data => {
       this.props.updateState('starData', data)
     },
     onFinish: stats => {
       this.props.updateState('starStats', stats)
+    }
+  })
+
+  _fetchForkData = () => ({
+    type: this.GithubRepoScript.fetchForkData,
+    onUpdate: data => {
+      this.props.updateState('forkData', data)
+    },
+    onFinish: stats => {
+      this.props.updateState('forkStats', stats)
     }
   })
 
@@ -73,6 +77,35 @@ class GithubSection extends React.Component {
     return formattedData
   }
 
+  _getForkIncrementData = () => {
+    const { forkData, forkStats, updateStatsField } = this.props
+    const formattedData = []
+    forkData.forEach((value, key) => {
+      formattedData.push({
+        date: key,
+        forks: value,
+      })
+      if (!forkStats.maxIncrement || value > forkStats.maxIncrement) {
+        updateStatsField('forkStats', { maxIncrement: value })
+      }
+    })
+    return formattedData
+  }
+
+  _getForkTotalData = () => {
+    const { forkData } = this.props
+    const formattedData = []
+    let cumulativeForkCount = 0
+    forkData.forEach((value, key) => {
+      cumulativeForkCount += value
+      formattedData.push({
+        date: key,
+        forks: cumulativeForkCount,
+      })
+    })
+    return formattedData
+  }
+
   _renderRepositoryStatistics = () => {
     const { owner, name, createdAt } = this.props.repoStats
 
@@ -94,6 +127,7 @@ class GithubSection extends React.Component {
       </div>
     )
   }
+
   _renderStarStatistics = () => {
     const { totalStar, maxIncrement, createdAt } = this.props.starStats
 
@@ -117,6 +151,29 @@ class GithubSection extends React.Component {
     )
   }
 
+  _renderForkStatistics = () => {
+    const { totalFork, maxIncrement, createdAt } = this.props.forkStats
+
+    const dateSinceCreated = Math.floor((Date.now() - new Date(createdAt).valueOf()) / (24*60*60*1000))
+    const averageForkPerDay = totalFork / dateSinceCreated
+
+    return (
+      <div>
+        <Row>
+          <Col span={8}><Card bordered={false}>
+            <Statistic title="Total Forks" value={totalFork} prefix={<Icon type="star" />} />
+          </Card></Col>
+          <Col span={8}><Card bordered={false}>
+            <Statistic title="Avg. fork/day" value={averageForkPerDay} precision={2} />
+          </Card></Col>
+          <Col span={8}><Card bordered={false}>
+            <Statistic title="Max increment a day" value={maxIncrement} />
+          </Card></Col>
+        </Row>
+      </div>
+    )
+  }
+
   _renderStarCharts = () => (
     <div>
       <Row>
@@ -126,12 +183,12 @@ class GithubSection extends React.Component {
         <ResponsiveContainer width="95%" height={300}>
           <AreaChart data={this._getStarTotalData()}>
             <defs>
-              <linearGradient id="gradientArea" x1="0" y1="0" x2="0" y2="1">
+              <linearGradient id="starGradientArea" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="5%" stopColor="#ffb900" stopOpacity={0.8}/>
                 <stop offset="95%" stopColor="#ffb900" stopOpacity={0}/>
               </linearGradient>
             </defs>
-            <Area type="monotone" dataKey="stars" stroke="#ffb900" fill={"url(#gradientArea)"} dot={false}/>
+            <Area type="monotone" dataKey="stars" stroke="#ffb900" fill={"url(#starGradientArea)"} dot={false}/>
             <CartesianGrid stroke="#ccc" strokeDasharray="2 7" />
             <XAxis
               dataKey="date"
@@ -172,6 +229,61 @@ class GithubSection extends React.Component {
     </div>
   )
 
+  _renderForkCharts = () => (
+    <div>
+      <Row>
+        Total Forks
+      </Row>
+      <Row>
+        <ResponsiveContainer width="95%" height={300}>
+          <AreaChart data={this._getForkTotalData()}>
+            <defs>
+              <linearGradient id="forkGradientArea" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="5%" stopColor="#333" stopOpacity={0.8}/>
+                <stop offset="95%" stopColor="#333" stopOpacity={0}/>
+              </linearGradient>
+            </defs>
+            <Area type="monotone" dataKey="forks" stroke="#333" fill={"url(#forkGradientArea)"} dot={false}/>
+            <CartesianGrid stroke="#ccc" strokeDasharray="2 7" />
+            <XAxis
+              dataKey="date"
+              domain = {['auto', 'auto']}
+              type="number"
+              tickFormatter={ms => new Date(ms).toISOString().slice(0,10)}
+            />
+            <YAxis />
+            <Tooltip
+              // formatter={(value, name) => [value, new Date(name).toISOString().slice(0,10)]}
+              labelFormatter={ms => new Date(ms).toISOString().slice(0,10)}
+            />
+          </AreaChart>
+        </ResponsiveContainer>
+      </Row>
+      <Row>
+        Daily increment
+      </Row>
+      <Row>
+        <ResponsiveContainer width="95%" height={300}>
+          <LineChart data={this._getForkIncrementData()}>
+            <Line type="monotone" dataKey="forks" stroke="#333" dot={false}/>
+            <CartesianGrid stroke="#ccc" strokeDasharray="3 7" />
+            <XAxis
+              dataKey="date"
+              domain = {['auto', 'auto']}
+              type="number"
+              tickFormatter={ms => new Date(ms).toISOString().slice(0,10)}
+            />
+            <YAxis />
+            <Tooltip
+            // formatter={(value, name) => [value, new Date(name).toISOString().slice(0,10)]}
+              labelFormatter={ms => new Date(ms).toISOString().slice(0,10)}
+            />
+          </LineChart>
+        </ResponsiveContainer>
+      </Row>
+    </div>
+  )
+
   render() {
     // const dotStyle = {strokeWidth: 2, r: 2.5}
     return (
@@ -179,7 +291,7 @@ class GithubSection extends React.Component {
         <DataUnit
           title="Repository"
           iconType="book"
-          iconColor="#222"
+          iconColor="#000"
           action={this._fetchRepositoryData()}
         >
           {this._renderRepositoryStatistics()}
@@ -194,6 +306,16 @@ class GithubSection extends React.Component {
           {this._renderStarStatistics()}
           {this._renderStarCharts()}
         </DataUnit>
+
+        <DataUnit
+          title="Forks"
+          iconType="fork"
+          iconColor="#333"
+          action={this._fetchForkData()}
+        >
+          {this._renderForkStatistics()}
+          {this._renderForkCharts()}
+        </DataUnit>
       </Card>
     )
   }
@@ -206,12 +328,16 @@ GithubSection.propTypes = {
   repoStats: PropTypes.object,
   starStats: PropTypes.object,
   starData: PropTypes.any,
+  forkStats: PropTypes.object,
+  forkData: PropTypes.any,
 }
 
 const mapStateToProps = state => ({
   repoStats: state.github.repoStats,
   starStats: state.github.starStats,
   starData: state.github.starData,
+  forkStats: state.github.forkStats,
+  forkData: state.github.forkData,
 })
 
 const mapDispatchToProps = dispatch => ({

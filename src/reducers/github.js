@@ -1,10 +1,12 @@
 const INITIAL_STATE = {
-
   repoData: [],
   repoStats: {},
 
   starData: [],
   starStats: {},
+
+  forkData: [],
+  forkStats: {},
 
 }
 
