@@ -1,8 +1,9 @@
 import React from 'react'
+import moment from 'moment'
 import { connect } from 'react-redux'
 import PropTypes from 'prop-types'
 
-import { Card, Progress, Button, Row, Col, Statistic, Icon, Typography } from 'antd'
+import { Card, Row, Col, Statistic, Icon } from 'antd'
 import { LineChart, AreaChart, Line, Area, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
 
 import DataUnit from './DataUnit'
@@ -11,7 +12,7 @@ import GithubRepoScript from '../scripts/GithubRepoScript'
 
 import { updateState, updateStatsField } from '../actions'
 
-const { Title } = Typography
+const CENTER_FLEX = { display: 'flex', justifyContent: 'center', alignContent: 'center' }
 
 
 class GithubSection extends React.Component {
@@ -107,7 +108,7 @@ class GithubSection extends React.Component {
   }
 
   _renderRepositoryStatistics = () => {
-    const { owner, name, createdAt } = this.props.repoStats
+    const { name, createdAt, primaryLanguage, pushedAt, watcherCount } = this.props.repoStats
 
     const dateSinceCreated = Math.floor((Date.now() - new Date(createdAt).valueOf()) / (24*60*60*1000))
 
@@ -115,13 +116,24 @@ class GithubSection extends React.Component {
       <div>
         <Row>
           <Col span={8}><Card bordered={false}>
-            <Statistic title="Repository" value={owner + "/" + name} />
+            <Statistic title="Repository" value={name} />
           </Card></Col>
           <Col span={8}><Card bordered={false}>
-            <Statistic title="Date Created" value={new Date(createdAt).toDateString()} />
+            <Statistic title="Date created" value={new Date(createdAt).toDateString()} />
           </Card></Col>
           <Col span={8}><Card bordered={false}>
             <Statistic title="Days since created" value={dateSinceCreated} />
+          </Card></Col>
+        </Row>
+        <Row>
+          <Col span={8}><Card bordered={false}>
+            <Statistic title="Primary language" value={primaryLanguage} />
+          </Card></Col>
+          <Col span={8}><Card bordered={false}>
+            <Statistic title="Last push at" value={moment(pushedAt).fromNow()} />
+          </Card></Col>
+          <Col span={8}><Card bordered={false}>
+            <Statistic title="Watchers" prefix={<Icon type="eye"/>} value={watcherCount} />
           </Card></Col>
         </Row>
       </div>
@@ -141,7 +153,7 @@ class GithubSection extends React.Component {
             <Statistic title="Total Stars" value={totalStar} prefix={<Icon type="star" />} />
           </Card></Col>
           <Col span={8}><Card bordered={false}>
-            <Statistic title="Avg. Star/day" value={averageStarPerDay} precision={2} />
+            <Statistic title="Avg. star/day" value={averageStarPerDay} precision={2} />
           </Card></Col>
           <Col span={8}><Card bordered={false}>
             <Statistic title="Max increment a day" value={maxIncrement} />
@@ -161,7 +173,7 @@ class GithubSection extends React.Component {
       <div>
         <Row>
           <Col span={8}><Card bordered={false}>
-            <Statistic title="Total Forks" value={totalFork} prefix={<Icon type="star" />} />
+            <Statistic title="Total public forks" value={totalFork} prefix={<Icon type="star" />} />
           </Card></Col>
           <Col span={8}><Card bordered={false}>
             <Statistic title="Avg. fork/day" value={averageForkPerDay} precision={2} />
@@ -180,51 +192,55 @@ class GithubSection extends React.Component {
         Total Stars
       </Row>
       <Row>
-        <ResponsiveContainer width="95%" height={300}>
-          <AreaChart data={this._getStarTotalData()}>
-            <defs>
-              <linearGradient id="starGradientArea" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#ffb900" stopOpacity={0.8}/>
-                <stop offset="95%" stopColor="#ffb900" stopOpacity={0}/>
-              </linearGradient>
-            </defs>
-            <Area type="monotone" dataKey="stars" stroke="#ffb900" fill={"url(#starGradientArea)"} dot={false}/>
-            <CartesianGrid stroke="#ccc" strokeDasharray="2 7" />
-            <XAxis
-              dataKey="date"
-              domain = {['auto', 'auto']}
-              type="number"
-              tickFormatter={ms => new Date(ms).toISOString().slice(0,10)}
-            />
-            <YAxis />
-            <Tooltip
+        <Card bordered={false} bodyStyle={CENTER_FLEX}>
+          <ResponsiveContainer width="80%" height={300}>
+            <AreaChart data={this._getStarTotalData()}>
+              <defs>
+                <linearGradient id="starGradientArea" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#ffb900" stopOpacity={0.8}/>
+                  <stop offset="95%" stopColor="#ffb900" stopOpacity={0}/>
+                </linearGradient>
+              </defs>
+              <Area type="monotone" dataKey="stars" stroke="#ffb900" fill={"url(#starGradientArea)"} dot={false}/>
+              <CartesianGrid stroke="#ccc" strokeDasharray="2 7" />
+              <XAxis
+                dataKey="date"
+                domain = {['auto', 'auto']}
+                type="number"
+                tickFormatter={ms => new Date(ms).toISOString().slice(0,10)}
+              />
+              <YAxis />
+              <Tooltip
               // formatter={(value, name) => [value, new Date(name).toISOString().slice(0,10)]}
-              labelFormatter={ms => new Date(ms).toISOString().slice(0,10)}
-            />
-          </AreaChart>
-        </ResponsiveContainer>
+                labelFormatter={ms => new Date(ms).toISOString().slice(0,10)}
+              />
+            </AreaChart>
+          </ResponsiveContainer>
+        </Card>
       </Row>
       <Row>
         Daily increment
       </Row>
       <Row>
-        <ResponsiveContainer width="95%" height={300}>
-          <LineChart data={this._getStarIncrementData()}>
-            <Line type="monotone" dataKey="stars" stroke="#ffb900" dot={false}/>
-            <CartesianGrid stroke="#ccc" strokeDasharray="3 7" />
-            <XAxis
-              dataKey="date"
-              domain = {['auto', 'auto']}
-              type="number"
-              tickFormatter={ms => new Date(ms).toISOString().slice(0,10)}
-            />
-            <YAxis />
-            <Tooltip
-            // formatter={(value, name) => [value, new Date(name).toISOString().slice(0,10)]}
-              labelFormatter={ms => new Date(ms).toISOString().slice(0,10)}
-            />
-          </LineChart>
-        </ResponsiveContainer>
+        <Card bordered={false} bodyStyle={CENTER_FLEX}>
+          <ResponsiveContainer width="80%" height={300}>
+            <LineChart data={this._getStarIncrementData()}>
+              <Line type="monotone" dataKey="stars" stroke="#ffb900" dot={false}/>
+              <CartesianGrid stroke="#ccc" strokeDasharray="3 7" />
+              <XAxis
+                dataKey="date"
+                domain = {['auto', 'auto']}
+                type="number"
+                tickFormatter={ms => new Date(ms).toISOString().slice(0,10)}
+              />
+              <YAxis />
+              <Tooltip
+                // formatter={(value, name) => [value, new Date(name).toISOString().slice(0,10)]}
+                labelFormatter={ms => new Date(ms).toISOString().slice(0,10)}
+              />
+            </LineChart>
+          </ResponsiveContainer>
+        </Card>
       </Row>
     </div>
   )
@@ -235,51 +251,55 @@ class GithubSection extends React.Component {
         Total Forks
       </Row>
       <Row>
-        <ResponsiveContainer width="95%" height={300}>
-          <AreaChart data={this._getForkTotalData()}>
-            <defs>
-              <linearGradient id="forkGradientArea" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#333" stopOpacity={0.8}/>
-                <stop offset="95%" stopColor="#333" stopOpacity={0}/>
-              </linearGradient>
-            </defs>
-            <Area type="monotone" dataKey="forks" stroke="#333" fill={"url(#forkGradientArea)"} dot={false}/>
-            <CartesianGrid stroke="#ccc" strokeDasharray="2 7" />
-            <XAxis
-              dataKey="date"
-              domain = {['auto', 'auto']}
-              type="number"
-              tickFormatter={ms => new Date(ms).toISOString().slice(0,10)}
-            />
-            <YAxis />
-            <Tooltip
+        <Card bordered={false} bodyStyle={CENTER_FLEX}>
+          <ResponsiveContainer width="80%" height={300}>
+            <AreaChart data={this._getForkTotalData()}>
+              <defs>
+                <linearGradient id="forkGradientArea" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#333" stopOpacity={0.8}/>
+                  <stop offset="95%" stopColor="#333" stopOpacity={0}/>
+                </linearGradient>
+              </defs>
+              <Area type="monotone" dataKey="forks" stroke="#333" fill={"url(#forkGradientArea)"} dot={false}/>
+              <CartesianGrid stroke="#ccc" strokeDasharray="2 7" />
+              <XAxis
+                dataKey="date"
+                domain = {['auto', 'auto']}
+                type="number"
+                tickFormatter={ms => new Date(ms).toISOString().slice(0,10)}
+              />
+              <YAxis />
+              <Tooltip
               // formatter={(value, name) => [value, new Date(name).toISOString().slice(0,10)]}
-              labelFormatter={ms => new Date(ms).toISOString().slice(0,10)}
-            />
-          </AreaChart>
-        </ResponsiveContainer>
+                labelFormatter={ms => new Date(ms).toISOString().slice(0,10)}
+              />
+            </AreaChart>
+          </ResponsiveContainer>
+        </Card>
       </Row>
       <Row>
         Daily increment
       </Row>
       <Row>
-        <ResponsiveContainer width="95%" height={300}>
-          <LineChart data={this._getForkIncrementData()}>
-            <Line type="monotone" dataKey="forks" stroke="#333" dot={false}/>
-            <CartesianGrid stroke="#ccc" strokeDasharray="3 7" />
-            <XAxis
-              dataKey="date"
-              domain = {['auto', 'auto']}
-              type="number"
-              tickFormatter={ms => new Date(ms).toISOString().slice(0,10)}
-            />
-            <YAxis />
-            <Tooltip
-            // formatter={(value, name) => [value, new Date(name).toISOString().slice(0,10)]}
-              labelFormatter={ms => new Date(ms).toISOString().slice(0,10)}
-            />
-          </LineChart>
-        </ResponsiveContainer>
+        <Card bordered={false} bodyStyle={CENTER_FLEX}>
+          <ResponsiveContainer width="80%" height={300}>
+            <LineChart data={this._getForkIncrementData()}>
+              <Line type="monotone" dataKey="forks" stroke="#333" dot={false}/>
+              <CartesianGrid stroke="#ccc" strokeDasharray="3 7" />
+              <XAxis
+                dataKey="date"
+                domain = {['auto', 'auto']}
+                type="number"
+                tickFormatter={ms => new Date(ms).toISOString().slice(0,10)}
+              />
+              <YAxis />
+              <Tooltip
+                // formatter={(value, name) => [value, new Date(name).toISOString().slice(0,10)]}
+                labelFormatter={ms => new Date(ms).toISOString().slice(0,10)}
+              />
+            </LineChart>
+          </ResponsiveContainer>
+        </Card>
       </Row>
     </div>
   )
@@ -287,7 +307,7 @@ class GithubSection extends React.Component {
   render() {
     // const dotStyle = {strokeWidth: 2, r: 2.5}
     return (
-      <Card className="Section-div">
+      <Card bordered={false} className="Section-div">
         <DataUnit
           title="Repository"
           iconType="book"

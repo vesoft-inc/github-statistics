@@ -28,7 +28,7 @@ class GithubRepoScript {
 
   /**
    * fetch repository low-level data
-   * @param onUpdate function that will be called when a new data update is avaiable
+   * @param onUpdate (@param data) function that will be called when a new data update is avaiable
    * @param onFinish function that will be called when fetching is finished
    * @param onProgress function that will be called when progress is updated
    * @returns Object that contains statistics
@@ -46,11 +46,15 @@ class GithubRepoScript {
     const query = /* GraphQL */ `
       query getRepository($owner: String!, $name: String!){
         repository(owner: $owner, name: $name) {
-          owner {
-            login
-          }
-          name
+          nameWithOwner
           createdAt
+          primaryLanguage {
+            name
+          }
+          pushedAt
+          watchers(first: 0) {
+            totalCount
+          }
         }
       }
     `
@@ -62,9 +66,11 @@ class GithubRepoScript {
 
     const data = await this.gqlClient.request(query, variables)
     const formattedData = {
-      owner: data.repository.owner.login,
-      name: data.repository.name,
+      name: data.repository.nameWithOwner,
       createdAt: data.repository.createdAt,
+      primaryLanguage: data.repository.primaryLanguage.name,
+      pushedAt: data.repository.pushedAt,
+      watcherCount: data.repository.watchers.totalCount,
     }
 
     // update progress tracking
@@ -87,8 +93,8 @@ class GithubRepoScript {
    * @returns Object that contains statistics
    */
   fetchStargazerData = async (onUpdate, onFinish, onProgress) => {
-    // const owner = 'graphql-go'
-    // const name = 'graphql'
+    // const owner = 'facebook'
+    // const name = 'react'
     const owner = 'vesoft-inc'
     const name = 'nebula'
 
@@ -199,7 +205,7 @@ class GithubRepoScript {
 
   /**
    * fetch fork data
-   * @param onUpdate function that will be called when a new data update is avaiable
+   * @param onUpdate (@param data) function that will be called when a new data update is avaiable
    * @param onFinish function that will be called when fetching is finished
    * @param onProgress function that will be called when progress is updated
    * @returns Object that contains statistics
@@ -221,6 +227,9 @@ class GithubRepoScript {
         repository(owner: $owner, name: $name) {
           createdAt
           forkCount
+          forks(first: 0) {
+            totalCount
+          }
         }
       }
     `
@@ -253,7 +262,7 @@ class GithubRepoScript {
     const preparationData = await this.gqlClient.request(preparationQuery, preparationVariables)
 
     // Statistics variables
-    totalToFetch = preparationData.repository.forkCount
+    totalToFetch = preparationData.repository.forks.totalCount
     const createdAt = preparationData.repository.createdAt
 
 
@@ -284,8 +293,6 @@ class GithubRepoScript {
       // update progress tracking
       if (onProgress) {
         onProgress(getProgress(numberFetched, totalToFetch))
-        console.log(numberFetched + " " + totalToFetch)
-        console.log(getProgress(numberFetched, totalToFetch))
       }
 
       // track class-level variables

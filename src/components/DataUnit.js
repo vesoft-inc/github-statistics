@@ -2,10 +2,7 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import _ from 'lodash'
 
-import { Card, Progress, Button, Row, Col, Icon, Typography } from 'antd'
-
-
-const { Title } = Typography
+import { Card, Progress, Button, Row, Col, Icon } from 'antd'
 
 class DataUnit extends React.Component {
   constructor(props) {
@@ -28,9 +25,9 @@ class DataUnit extends React.Component {
       </Col>
       <Col span={8}>
         <Card bordered={false}>
-          <Title>
+          <div className="Section-title">
             {title}
-          </Title>
+          </div>
         </Card>
       </Col>
       <Col span={8}>
