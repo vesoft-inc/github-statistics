@@ -8,6 +8,9 @@ const INITIAL_STATE = {
   forkData: [],
   forkStats: {},
 
+  releaseData: [],
+  releaseStats: {},
+
 }
 
 const github = (state = INITIAL_STATE, action) => {

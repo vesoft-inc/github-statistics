@@ -1,6 +1,8 @@
 import {  } from 'graphql'
 import { GraphQLClient } from 'graphql-request'
 
+const getProgress = (c, t) => Math.floor(c / t * 100)
+
 class GithubRepoScript {
 
   constructor() {
@@ -137,7 +139,6 @@ class GithubRepoScript {
     let numberFetched = 0
     let previousEndCursor = null
     const addNumberFetched = () => numberFetched += 1
-    const getProgress = (c, t) => Math.floor(c / t * 100)
 
     // Preparation query
     const preparationData = await this.gqlClient.request(preparationQuery, preparationVariables)
@@ -256,7 +257,6 @@ class GithubRepoScript {
     let numberFetched = 0
     let previousEndCursor = null
     const addNumberFetched = () => numberFetched += 1
-    const getProgress = (c, t) => Math.floor(c / t * 100)
 
     // Preparation query
     const preparationData = await this.gqlClient.request(preparationQuery, preparationVariables)
@@ -314,6 +314,104 @@ class GithubRepoScript {
       onFinish({
         totalFork: totalToFetch,
         createdAt,
+      })
+    }
+
+    this.reset()
+
+    return formattedData
+  }
+
+  /**
+   * fetch release data
+   * @param onUpdate (@param data) function that will be called when a new data update is avaiable
+   * @param onFinish function that will be called when fetching is finished
+   * @param onProgress function that will be called when progress is updated
+   * @returns Object that contains statistics
+   */
+  fetchReleaseData = async (onUpdate, onFinish, onProgress) => {
+    // const owner = 'graphql-go'
+    // const name = 'graphql'
+    const owner = 'vesoft-inc'
+    const name = 'nebula'
+
+    const variables = {
+      owner: owner,
+      name: name,
+    }
+
+    // define the graphql query
+    const query = /* GraphQL */ `
+      query getRelease($owner: String!, $name: String!){
+        repository(owner: $owner, name: $name) {
+          releases(first: 1, orderBy:{field:CREATED_AT,direction: DESC}) {
+            totalCount
+            nodes {
+              name
+              tagName
+              createdAt
+              releaseAssets (first: 20) {
+                totalCount
+                nodes {
+                  id
+                  name
+                  updatedAt
+                  contentType
+                  createdAt
+                  downloadCount
+                  
+                }
+              }
+            }
+          }
+        }
+      }
+    `
+
+    // local variables
+    const formattedData = []
+    let totalToFetch = 0
+    let numberFetched = 0
+    const addNumberFetched = () => numberFetched += 1
+
+    // Preparation query
+    const data = await this.gqlClient.request(query, variables)
+
+    // Statistics variables
+    totalToFetch = data.repository.releases.nodes[0].releaseAssets.totalCount
+    let totalDownloads = 0
+
+    // get stats of each asset
+    data.repository.releases.nodes[0].releaseAssets.nodes.forEach(asset => {
+      formattedData.push({
+        id: asset.id,
+        name: asset.name,
+        updatedAt: asset.updatedAt,
+        contentType: asset.contentType,
+        createdAt: asset.createdAt,
+        downloadCount: asset.downloadCount,
+      })
+
+      totalDownloads += asset.downloadCount
+
+      addNumberFetched()
+      if (onProgress) {
+        onProgress(getProgress(numberFetched, totalToFetch))
+      }
+    })
+
+    if (onUpdate) {
+      console.log(formattedData)
+      onUpdate(formattedData)
+    }
+
+    if (onFinish) {
+      onFinish({
+        totalAssets: totalToFetch,
+        totalDownloads: totalDownloads,
+        name: data.repository.releases.nodes[0].name,
+        tagName: data.repository.releases.nodes[0].tagName,
+        createdAt: data.repository.releases.nodes[0].createdAt
       })
     }
 

@@ -3,7 +3,7 @@ import moment from 'moment'
 import { connect } from 'react-redux'
 import PropTypes from 'prop-types'
 
-import { Card, Row, Col, Statistic, Icon } from 'antd'
+import { Card, Row, Col, Statistic, Icon, Descriptions } from 'antd'
 import { LineChart, AreaChart, Line, Area, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
 
 import DataUnit from './DataUnit'
@@ -46,6 +46,16 @@ class GithubSection extends React.Component {
     },
     onFinish: stats => {
       this.props.updateState('forkStats', stats)
+    }
+  })
+
+  _fetchReleaseData = () => ({
+    type: this.GithubRepoScript.fetchReleaseData,
+    onUpdate: data => {
+      this.props.updateState('releaseData', data)
+    },
+    onFinish: stats => {
+      this.props.updateState('releaseStats', stats)
     }
   })
 
@@ -182,6 +192,40 @@ class GithubSection extends React.Component {
             <Statistic title="Max increment a day" value={maxIncrement} />
           </Card></Col>
         </Row>
+      </div>
+    )
+  }
+
+  _renderReleaseStatistics = () => {
+    const { totalAssets, name, tagName, createdAt, totalDownloads } = this.props.releaseStats
+
+    const dateSinceCreated = Math.floor((Date.now() - new Date(createdAt).valueOf()) / (24*60*60*1000))
+    const averageDownloadsPerDay = totalDownloads / dateSinceCreated
+
+    return (
+      <div>
+        <Row>
+          <Col span={8}><Card bordered={false}>
+            <Statistic title="Total assets" value={totalAssets} />
+          </Card></Col>
+          <Col span={8}><Card bordered={false}>
+            <Statistic title="Total asset downlaods" value={totalDownloads} prefix={<Icon type="download"/>} />
+          </Card></Col>
+          <Col span={8}><Card bordered={false}>
+            <Statistic title="Avg. downloads/day" value={averageDownloadsPerDay} precision={2} />
+          </Card></Col>
+        </Row>
+        {this.props.releaseData.map(asset => (
+          <Card key={asset.id} bordered={false} bodyStyle={CENTER_FLEX}>
+            <Descriptions bordered size="small" layout="vertical" style={{ width: '80%' }}>
+              <Descriptions.Item label="Asset">{asset.name}</Descriptions.Item>
+              <Descriptions.Item label="Content type">{asset.contentType}</Descriptions.Item>
+              <Descriptions.Item label="Downloads">{asset.downloadCount}</Descriptions.Item>
+              <Descriptions.Item label="Created at">{moment(asset.createdAt).format("MMMM Do YYYY, h:mm:ss a")}</Descriptions.Item>
+              <Descriptions.Item label="Updated at">{moment(asset.updatedAt).format("MMMM Do YYYY, h:mm:ss a")}</Descriptions.Item>
+            </Descriptions>
+          </Card>
+        ))}
       </div>
     )
   }
@@ -336,6 +380,15 @@ class GithubSection extends React.Component {
           {this._renderForkStatistics()}
           {this._renderForkCharts()}
         </DataUnit>
+
+        <DataUnit
+          title="Latest Release"
+          iconType="tag"
+          iconColor="#333"
+          action={this._fetchReleaseData()}
+        >
+          {this._renderReleaseStatistics()}
+        </DataUnit>
       </Card>
     )
   }
@@ -350,6 +403,8 @@ GithubSection.propTypes = {
   starData: PropTypes.any,
   forkStats: PropTypes.object,
   forkData: PropTypes.any,
+  releaseStats: PropTypes.object,
+  releaseData: PropTypes.any,
 }
 
 const mapStateToProps = state => ({
@@ -358,6 +413,8 @@ const mapStateToProps = state => ({
   starData: state.github.starData,
   forkStats: state.github.forkStats,
   forkData: state.github.forkData,
+  releaseStats: state.github.releaseStats,
+  releaseData: state.github.releaseData,
 })
 
 const mapDispatchToProps = dispatch => ({
