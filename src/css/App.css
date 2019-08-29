@@ -31,3 +31,30 @@
   font-weight: 600;
   font-size: 38px;
 }
+
+/* OVERLOADS */
+.ant-anchor-ink::before {
+  position: relative;
+  display: block;
+  width: 0px;
+  height: 100%;
+  margin: 0 auto;
+  background-color: #e8e8e8;
+  content: ' ';
+}
+
+.ant-anchor-ink-ball {
+  position: absolute;
+  left: 50%;
+  display: none;
+  width: 1px;
+  height: 8px;
+  background-color: #fff;
+  border: 1px solid #222;
+  border-radius: 8px;
+  -webkit-transform: translateX(-50%);
+  -ms-transform: translateX(-50%);
+  transform: translateX(-50%);
+  -webkit-transition: top 0.3s ease-in-out;
+  transition: top 0.3s ease-in-out;
+}

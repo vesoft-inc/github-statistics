@@ -3,7 +3,7 @@ import moment from 'moment'
 import { connect } from 'react-redux'
 import PropTypes from 'prop-types'
 
-import { Card, Row, Col, Statistic, Icon, Descriptions } from 'antd'
+import { Card, Row, Col, Statistic, Icon, Descriptions, Anchor } from 'antd'
 import { LineChart, AreaChart, Line, Area, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
 
 import DataUnit from './DataUnit'
@@ -205,6 +205,14 @@ class GithubSection extends React.Component {
     return (
       <div>
         <Row>
+          <Col span={12}><Card bordered={false}>
+            <Statistic title="Release tag" value={tagName} />
+          </Card></Col>
+          <Col span={12}><Card bordered={false}>
+            <Statistic title="Release name" value={name} />
+          </Card></Col>
+        </Row>
+        <Row>
           <Col span={8}><Card bordered={false}>
             <Statistic title="Total assets" value={totalAssets} />
           </Card></Col>
@@ -352,7 +360,15 @@ class GithubSection extends React.Component {
     // const dotStyle = {strokeWidth: 2, r: 2.5}
     return (
       <Card bordered={false} className="Section-div">
+        <Anchor bounds={0} style={{ position: 'absolute', zIndex: 1000 }} >
+          <Anchor.Link title="Repository" href="#Repository" />
+          <Anchor.Link title="Star" href="#Star" />
+          <Anchor.Link title="Fork" href="#Fork" />
+          <Anchor.Link title="Release" href="#Release" />
+        </Anchor>
+        
         <DataUnit
+          id="Repository"
           title="Repository"
           iconType="book"
           iconColor="#000"
@@ -362,6 +378,7 @@ class GithubSection extends React.Component {
         </DataUnit>
 
         <DataUnit
+          id="Star"
           title="Star Trend"
           iconType="star"
           iconColor="#ffb900"
@@ -372,6 +389,7 @@ class GithubSection extends React.Component {
         </DataUnit>
 
         <DataUnit
+          id="Fork"
           title="Forks"
           iconType="fork"
           iconColor="#333"
@@ -382,6 +400,7 @@ class GithubSection extends React.Component {
         </DataUnit>
 
         <DataUnit
+          id="Release"
           title="Latest Release"
           iconType="tag"
           iconColor="#333"

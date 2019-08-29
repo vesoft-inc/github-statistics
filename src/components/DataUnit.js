@@ -2,7 +2,7 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import _ from 'lodash'
 
-import { Card, Progress, Button, Row, Col, Icon } from 'antd'
+import { Card, Progress, Button, Row, Col, Icon, Divider } from 'antd'
 
 class DataUnit extends React.Component {
   constructor(props) {
@@ -67,6 +67,7 @@ class DataUnit extends React.Component {
   render() {
     const { ready } = this.state
     const {
+      id,
       title,
       iconType,
       iconColor,
@@ -74,18 +75,20 @@ class DataUnit extends React.Component {
       action,
     } = this.props
     return (
-      <div>
+      <div id={id}>
         {this._renderSection(
           title, iconType, iconColor,
           this._renderGetButton(action)
         )}
         {ready && children}
+        <Divider dashed/>
       </div>
     )
   }
 }
 
 DataUnit.propTypes = {
+  id: PropTypes.string,
   children: PropTypes.any,
   title: PropTypes.string,
   iconColor: PropTypes.string,
