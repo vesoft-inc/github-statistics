@@ -8,29 +8,33 @@ import { LineChart, AreaChart, Line, Area, CartesianGrid, XAxis, YAxis, Tooltip,
 
 import DataUnit from './DataUnit'
 
-import GithubRepoScript from '../scripts/GithubRepoScript'
+import GithubStarSection from './GithubStarSection'
+
+import GithubFetcher from '../scripts/GithubFetcher'
 
 import { updateState, updateStatsField } from '../actions'
 
 const CENTER_FLEX = { display: 'flex', justifyContent: 'center', alignContent: 'center' }
 
 
-class GithubSection extends React.Component {
+class GithubStatistics extends React.Component {
   constructor(props) {
     super(props)
 
-    this.GithubRepoScript = new GithubRepoScript()
+    this.GithubFetcher = new GithubFetcher('05c1acf261f6b223411c73d8b71cb1a30ce9186a')
+
+    this.props.updateState("githubApiToken", '05c1acf261f6b223411c73d8b71cb1a30ce9186a')
   }
 
   _fetchRepositoryData = () => ({
-    type: this.GithubRepoScript.fetchRepositoryData,
+    type: this.GithubFetcher.fetchRepositoryData,
     onFinish: stats => {
       this.props.updateState('repoStats', stats)
     }
   })
 
   _fetchStargazerData = () => ({
-    type: this.GithubRepoScript.fetchStargazerData,
+    type: this.GithubFetcher.fetchStargazerData,
     onUpdate: data => {
       this.props.updateState('starData', data)
     },
@@ -40,7 +44,7 @@ class GithubSection extends React.Component {
   })
 
   _fetchForkData = () => ({
-    type: this.GithubRepoScript.fetchForkData,
+    type: this.GithubFetcher.fetchForkData,
     onUpdate: data => {
       this.props.updateState('forkData', data)
     },
@@ -50,7 +54,7 @@ class GithubSection extends React.Component {
   })
 
   _fetchReleaseData = () => ({
-    type: this.GithubRepoScript.fetchReleaseData,
+    type: this.GithubFetcher.fetchReleaseData,
     onUpdate: data => {
       this.props.updateState('releaseData', data)
     },
@@ -359,7 +363,7 @@ class GithubSection extends React.Component {
   render() {
     // const dotStyle = {strokeWidth: 2, r: 2.5}
     return (
-      <Card bordered={false} className="Section-div">
+      <Card bordered={false} className="section-div">
         <Anchor bounds={0} style={{ position: 'absolute', zIndex: 1000 }} >
           <Anchor.Link title="Repository" href="#Repository" />
           <Anchor.Link title="Star" href="#Star" />
@@ -376,6 +380,10 @@ class GithubSection extends React.Component {
         >
           {this._renderRepositoryStatistics()}
         </DataUnit>
+
+        <GithubStarSection
+          repos={['vesoft-inc/nebula', 'facebook/react']}
+        />
 
         <DataUnit
           id="Star"
@@ -413,7 +421,7 @@ class GithubSection extends React.Component {
   }
 }
 
-GithubSection.propTypes = {
+GithubStatistics.propTypes = {
   updateState: PropTypes.func,
   updateStatsField: PropTypes.func,
 
@@ -444,4 +452,4 @@ const mapDispatchToProps = dispatch => ({
 export default connect(
   mapStateToProps,
   mapDispatchToProps
-)(GithubSection)
+)(GithubStatistics)

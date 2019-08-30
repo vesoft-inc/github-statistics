@@ -3,11 +3,10 @@ import { GraphQLClient } from 'graphql-request'
 
 const getProgress = (c, t) => Math.floor(c / t * 100)
 
-class GithubRepoScript {
+class GithubFetcher {
 
-  constructor() {
+  constructor(token) {
     const endpoint = 'https://api.github.com/graphql'
-    const token = 'd3142837a321306fde94c59774009c8ab9eeeaac'
 
     this.gqlClient = new GraphQLClient(
       endpoint,
@@ -421,4 +420,4 @@ class GithubRepoScript {
   }
 }
 
-export default GithubRepoScript
+export default GithubFetcher

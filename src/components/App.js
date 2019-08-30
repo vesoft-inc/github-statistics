@@ -1,5 +1,5 @@
 import React from 'react'
-import GithubSection from './GithubSection'
+import GithubStatistics from './GithubStatistics'
 import '../css/App.css'
 class App extends React.Component {
   render() {
@@ -8,7 +8,7 @@ class App extends React.Component {
         <header className="App-header">
         </header>
         <div>
-          <GithubSection />
+          <GithubStatistics />
         </div>
       </div>
     )

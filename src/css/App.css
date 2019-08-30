@@ -20,13 +20,13 @@
   color: white;
 }
 
-.Section-div {
+.section-div {
   width: 90%;
   margin: auto;
   /* display: block; */
 }
 
-.Section-title {
+.section-title {
   color: rgba(0, 0, 0, 0.85);
   font-weight: 600;
   font-size: 38px;
@@ -57,4 +57,8 @@
   transform: translateX(-50%);
   -webkit-transition: top 0.3s ease-in-out;
   transition: top 0.3s ease-in-out;
+}
+
+.ant-anchor-link-title.ant-anchor-link-title-active {
+  color: rgba(0, 0, 0, 1);
 }

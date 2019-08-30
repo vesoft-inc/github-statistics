@@ -25,7 +25,7 @@ class DataUnit extends React.Component {
       </Col>
       <Col span={8}>
         <Card bordered={false}>
-          <div className="Section-title">
+          <div className="section-title">
             {title}
           </div>
         </Card>

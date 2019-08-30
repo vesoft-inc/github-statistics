@@ -11,6 +11,8 @@ const INITIAL_STATE = {
   releaseData: [],
   releaseStats: {},
 
+  githubApiToken: '05c1acf261f6b223411c73d8b71cb1a30ce9186a',
+
 }
 
 const github = (state = INITIAL_STATE, action) => {
