@@ -20,21 +20,12 @@ const CENTER_FLEX = { display: 'flex', justifyContent: 'center', alignContent: '
 class GithubStatistics extends React.Component {
   constructor(props) {
     super(props)
-    this.state={
-      repos:['vesoft-inc/nebula', 'facebook/react']
-    }
+
     this.GithubFetcher = new GithubFetcher('05c1acf261f6b223411c73d8b71cb1a30ce9186a')
 
     this.props.updateState("githubApiToken", '05c1acf261f6b223411c73d8b71cb1a30ce9186a')
   }
 
-  deleteGithub(index){
-    const {repos}=this.state
-    repos.splice(index,1)
-    this.setState({
-      repos:repos
-    })
-  }
   _fetchRepositoryData = () => ({
     type: this.GithubFetcher.fetchRepositoryData,
     onFinish: stats => {
@@ -371,7 +362,6 @@ class GithubStatistics extends React.Component {
 
   render() {
     // const dotStyle = {strokeWidth: 2, r: 2.5}
-    const {repos} =this.state
     return (
       <Card bordered={false} className="section-div">
         <Anchor bounds={0} style={{ position: 'absolute', zIndex: 1000 }} >
@@ -392,8 +382,7 @@ class GithubStatistics extends React.Component {
         </DataUnit>
 
         <GithubStarSection
-          repos={repos}
-          deleteGithub={e=>this.deleteGithub(e)}
+          repos={['vesoft-inc/nebula', 'facebook/react']}
         />
 
         <DataUnit
