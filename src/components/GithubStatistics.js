@@ -3,18 +3,20 @@ import moment from 'moment'
 import { connect } from 'react-redux'
 import PropTypes from 'prop-types'
 
-import { Card, Row, Col, Statistic, Icon, Descriptions, Anchor, Button } from 'antd'
-import { LineChart, AreaChart, Line, Area, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
+import TYPES from './DataTypes'
+
+import { Card, Row, Col, Statistic, Icon, Descriptions, Anchor, Button, Input, Tag, Tooltip } from 'antd'
+import { LineChart, AreaChart, Line, Area, CartesianGrid, XAxis, YAxis, ResponsiveContainer, Tooltip as ChartToolTip } from 'recharts'
 
 import DataUnit from './DataUnit'
-
-import GithubStarSection from './GithubStarSection'
+import DataSection from './DataSection'
 
 import GithubFetcher from '../scripts/GithubFetcher'
 
 import { updateState, updateStatsField } from '../actions'
 
-const CENTER_FLEX = { display: 'flex', justifyContent: 'center', alignContent: 'center' }
+const CENTER_FLEX = { display: 'flex', placeContent: 'center' }
+const CENTER_LEFT_FLEX = { display: 'flex', justifyContent: 'flex-start', alignContent: 'center'}
 
 
 class GithubStatistics extends React.Component {
@@ -22,8 +24,9 @@ class GithubStatistics extends React.Component {
     super(props)
 
     this.state = {
-      repos:['vesoft-inc/nebula', 'facebook/react'],
-      deleteRepo: ''
+      repos:[],
+      input: '',
+      deleteRepo: '',
     }
     this.GithubFetcher = new GithubFetcher('05c1acf261f6b223411c73d8b71cb1a30ce9186a')
 
@@ -33,19 +36,19 @@ class GithubStatistics extends React.Component {
   deleteRepo = index => {
     const { repos } = this.state
     const deleteRepo = repos[index]
+    console.log(deleteRepo)
     repos.splice(index,1)
     this.setState({
-      repos,
-      // deleteRepo: deleteRepo,
+      repos: [...repos],
+      deleteRepo: deleteRepo,
     })
   }
 
   addRepo = name => {
     const { repos } = this.state
-    repos.push(name)
     this.setState({
-      repos,
-      // deleteRepo: '',
+      repos: [ ...repos, name],
+      deleteRepo: '',
     })
   }
 
@@ -289,7 +292,7 @@ class GithubStatistics extends React.Component {
                 tickFormatter={ms => new Date(ms).toISOString().slice(0,10)}
               />
               <YAxis />
-              <Tooltip
+              <ChartToolTip
               // formatter={(value, name) => [value, new Date(name).toISOString().slice(0,10)]}
                 labelFormatter={ms => new Date(ms).toISOString().slice(0,10)}
               />
@@ -313,7 +316,7 @@ class GithubStatistics extends React.Component {
                 tickFormatter={ms => new Date(ms).toISOString().slice(0,10)}
               />
               <YAxis />
-              <Tooltip
+              <ChartToolTip
                 // formatter={(value, name) => [value, new Date(name).toISOString().slice(0,10)]}
                 labelFormatter={ms => new Date(ms).toISOString().slice(0,10)}
               />
@@ -348,7 +351,7 @@ class GithubStatistics extends React.Component {
                 tickFormatter={ms => new Date(ms).toISOString().slice(0,10)}
               />
               <YAxis />
-              <Tooltip
+              <ChartToolTip
               // formatter={(value, name) => [value, new Date(name).toISOString().slice(0,10)]}
                 labelFormatter={ms => new Date(ms).toISOString().slice(0,10)}
               />
@@ -372,7 +375,7 @@ class GithubStatistics extends React.Component {
                 tickFormatter={ms => new Date(ms).toISOString().slice(0,10)}
               />
               <YAxis />
-              <Tooltip
+              <ChartToolTip
                 // formatter={(value, name) => [value, new Date(name).toISOString().slice(0,10)]}
                 labelFormatter={ms => new Date(ms).toISOString().slice(0,10)}
               />
@@ -383,75 +386,120 @@ class GithubStatistics extends React.Component {
     </div>
   )
 
-  render() {
-    // const dotStyle = {strokeWidth: 2, r: 2.5}
-    const { repos, deleteRepo} =this.state
+  _renderTags = () => {
+    const { repos } = this.state
 
     return (
-      <Card bordered={false} className="section-div">
-        <Anchor bounds={0} style={{ position: 'absolute', zIndex: 1000 }} >
-          <Anchor.Link title="Repository" href="#Repository" />
-          <Anchor.Link title="Star" href="#Star" />
-          <Anchor.Link title="Fork" href="#Fork" />
-          <Anchor.Link title="Release" href="#Release" />
-        </Anchor>
+      repos.map((repo, index) => (
+        <Tag key={"tag" + repo} closable onClose={() => this.deleteRepo(index)}>
+          {repo}
+        </Tag>
+      ))
+    )
+  }
 
-        <DataUnit
-          id="Repository"
-          title="Repository"
-          iconType="book"
-          iconColor="#000"
-          action={this._fetchRepositoryData()}
-        >
-          {this._renderRepositoryStatistics()}
-        </DataUnit>
+  render() {
+    // const dotStyle = {strokeWidth: 2, r: 2.5}
+    const { repos, deleteRepo, input} = this.state
 
-        <Button onClick={() => this.addRepo('vesoft-inc/nebula')}>
-          Add
-        </Button>
-        <Button onClick={() => this.addRepo('facebook/redux')}>
-          Add another
-        </Button>
-        <Button onClick={() => this.deleteRepo(0)}>
-          Delete
-        </Button>
-        <GithubStarSection
-          repos={repos}
-          // deleteRepo={deleteRepo}
-        />
+    return (
+      <div className="container">
+        <header>
+          <div id="header">
+            <Row type="flex" align="middle">
+              <Col span={4}>
+                <span className="header-title">
+                  Github Stats
+                </span>
+              </Col>
+              <Col span={6} className="flex-center">
+                <Input
+                  className="header-input"
+                  placeholder="owner/name"
+                  value={input}
+                  onChange={e => this.setState({ input: e.target.value })}
+                  onPressEnter
+                />
+                <Tooltip>
+                  <Button
+                  // style={{ display: 'inline-block'}}
+                    disabled={
+                      input === ''
+                    || repos.includes(input)
+                    }
+                    onClick={() => this.addRepo(input)}
+                  >
+                  Add Repo
+                  </Button>
+                </Tooltip>
 
-        <DataUnit
-          id="Star"
-          title="Star Trend"
-          iconType="star"
-          iconColor="#ffb900"
-          action={this._fetchStargazerData()}
-        >
-          {this._renderStarStatistics()}
-          {this._renderStarCharts()}
-        </DataUnit>
+              </Col>
+              <Col span={12} className="flex-center-left header-section">
+                {this._renderTags()}
+              </Col>
+            </Row>
 
-        <DataUnit
-          id="Fork"
-          title="Forks"
-          iconType="fork"
-          iconColor="#333"
-          action={this._fetchForkData()}
-        >
-          {this._renderForkStatistics()}
-          {this._renderForkCharts()}
-        </DataUnit>
+          </div>
+        </header>
+        <div>
+          <Card bordered={false} className="body" >
+            <Anchor bounds={0} style={{ position: 'absolute', zIndex: 1000 }} >
+              <Anchor.Link title="Repository" href="#Repository" />
+              <Anchor.Link title="Star" href="#Star" />
+              <Anchor.Link title="Fork" href="#Fork" />
+              <Anchor.Link title="Release" href="#Release" />
+            </Anchor>
 
-        <DataUnit
-          id="Release"
-          title="Latest Release"
-          iconType="tag"
-          iconColor="#333"
-          action={this._fetchReleaseData()}
-        >
-          {this._renderReleaseStatistics()}
-        </DataUnit>
-      </Card>
+            <DataUnit
+              id="Repository"
+              title="Repository"
+              iconType="book"
+              iconColor="#000"
+              action={this._fetchRepositoryData()}
+            >
+              {this._renderRepositoryStatistics()}
+            </DataUnit>
+
+            <DataSection
+              type={TYPES.STAR}
+              repos={repos}
+              deleteRepo={deleteRepo}
+            />
+
+            <DataUnit
+              id="Star"
+              title="Star Trend"
+              iconType="star"
+              iconColor="#ffb900"
+              action={this._fetchStargazerData()}
+            >
+              {this._renderStarStatistics()}
+              {this._renderStarCharts()}
+            </DataUnit>
+
+            <DataUnit
+              id="Fork"
+              title="Forks"
+              iconType="fork"
+              iconColor="#333"
+              action={this._fetchForkData()}
+            >
+              {this._renderForkStatistics()}
+              {this._renderForkCharts()}
+            </DataUnit>
+
+            <DataUnit
+              id="Release"
+              title="Latest Release"
+              iconType="tag"
+              iconColor="#333"
+              action={this._fetchReleaseData()}
+            >
+              {this._renderReleaseStatistics()}
+            </DataUnit>
+          </Card>
+        </div>
+      </div>
     )
   }
 }
