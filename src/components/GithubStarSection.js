@@ -29,6 +29,10 @@ class GithubStarSection extends React.Component {
   //     this.setState({ data, progress })
   //   }
   // }
+  static getDerivedStateFromProps(props, state) {
+    state.progress.delete(props.deleteNmae)
+    return state
+  }
 
   /**
    * TODO
@@ -110,9 +114,6 @@ class GithubStarSection extends React.Component {
   render() {
     const { ready } = this.state
     const { repos } = this.props
-
-    console.log(repos)
-
     return (
       <div id="github-star-section">
         <Row type="flex" align="middle">
