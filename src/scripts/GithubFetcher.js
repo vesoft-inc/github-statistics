@@ -18,6 +18,7 @@ class GithubFetcher {
     )
 
     // configurations
+    this.liveUpdate = false
     this.pagesPerUpdate = 20
   }
 
@@ -183,7 +184,7 @@ class GithubFetcher {
       pageIndex += 1
 
       // onUpdate callback if existed
-      if (onUpdate && pageIndex % this.pagesPerUpdate === 0) {
+      if (this.liveUpdate && onUpdate && pageIndex % this.pagesPerUpdate === 0) {
         onUpdate(formattedData)
       }
     } while (previousEndCursor !== null)
@@ -301,7 +302,7 @@ class GithubFetcher {
       pageIndex += 1
 
       // onUpdate callback if existed
-      if (onUpdate && pageIndex % this.pagesPerUpdate === 0) {
+      if (this.liveUpdate && onUpdate && pageIndex % this.pagesPerUpdate === 0) {
         onUpdate(formattedData)
       }
     } while (previousEndCursor !== null)
@@ -400,7 +401,6 @@ class GithubFetcher {
     })
 
     if (onUpdate) {
-      console.log(formattedData)
       onUpdate(formattedData)
     }
 

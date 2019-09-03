@@ -1,7 +1,7 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
-import _ from 'lodash'
+// import _ from 'lodash'
 
 import { Card, Progress, Button, Row, Col, Icon } from 'antd'
 import GithubFetcher from '../scripts/GithubFetcher'
@@ -13,27 +13,37 @@ class GithubStarSection extends React.Component {
     this.state = {
       progress: new Map(),
       data: new Map(),
+      init: true, // indicate wether this is initially rendered
     }
 
     const { githubApiToken } = this.props
     this.fetcher = new GithubFetcher(githubApiToken)
   }
 
-  static getDerivedStateFromProps(props, state) {
-    console.log(props,state)
-  }
+  // componentDidUpdate(prevProps) {
+  //   const { deleteRepo } = this.props
+  //   const { data, progress } = this.state
+  //   if (deleteRepo === prevProps.deleteRepo && deleteRepo !== '') {
+  //     data.delete(deleteRepo)
+  //     progress.delete(deleteRepo)
+  //     this.setState({ data, progress })
+  //   }
+  // }
 
   /**
    * TODO
    * fetching for a specific repository
    */
-  _fetch = (name) => {
-    console.log(name)
+  _fetch = name => {
     this.fetcher.fetchStargazerData(
       // onUpdate
-      data => {},
+      data => {
+        this.state.data.set(name, data)
+      },
       // onFinish
-      stats => {},
+      stats => {
+        this.state.data.set(name, stats)
+      },
       // onProgres
       progress => {
         this.state.progress.set(name,progress)
@@ -46,20 +56,43 @@ class GithubStarSection extends React.Component {
   }
 
   _renderUpdateAllButton = () => {
+    const { progress, init } = this.state
+    const { repos } = this.props
+
+    const allProgress =
+      Array.from(progress.values()).reduce((a, b) => a + b, 0)
+      / (progress.size === 0 ? 1 : progress.size)
+
+    // console.log(allProgress)
+    const allLoading = allProgress !== 100
+
     return (
       <div style={{ display: 'inline-block'}}>
-        <Button icon="cloud-download">
+        <Button
+          icon="cloud-download"
+          onClick={() => {
+            this.setState({ init: false })
+            repos.forEach(name => this._fetch(name))
+          }}
+          loading={!init && allLoading}
+        >
           Update All
         </Button>
+        <Progress
+          style={{ lineHeight: 0.7, display: 'block'}}
+          percent={allProgress}
+          showInfo={false}
+          strokeWidth={5}
+        />
       </div>
     )
   }
 
-  _renderRepoTagButton = (name,index) => {
+  _renderRepoTagButton = name => {
     const { progress } = this.state
     return (
-      <div style={{ display: 'inline-block'}}>
-        <Button onClick={e=>this._fetch(name)}>
+      <div id="name" style={{ display: 'inline-block'}}>
+        <Button onClick={() =>this._fetch(name)}>
           {name}
         </Button>
         <Progress
@@ -68,9 +101,6 @@ class GithubStarSection extends React.Component {
           showInfo={false}
           strokeWidth={5}
         />
-        <Button onClick={e=>this.props.deleteGithub(index)}>
-          删除
-        </Button>
       </div>
 
     )
@@ -80,6 +110,8 @@ class GithubStarSection extends React.Component {
   render() {
     const { ready } = this.state
     const { repos } = this.props
+
+    console.log(repos)
 
     return (
       <div id="github-star-section">
@@ -103,8 +135,8 @@ class GithubStarSection extends React.Component {
           </Col>
         </Row>
         <Row>
-          {repos.map((name ,index)=> (
-            this._renderRepoTagButton(name,index)
+          {repos.map(name => (
+            this._renderRepoTagButton(name)
           ))}
         </Row>
         {ready}
@@ -116,7 +148,8 @@ class GithubStarSection extends React.Component {
 
 GithubStarSection.propTypes = {
   githubApiToken: PropTypes.string,
-  repos: PropTypes.array
+  repos: PropTypes.array,
+  deleteRepo: PropTypes.string,
 }
 
 const mapStateToProps = state => ({

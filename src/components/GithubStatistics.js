@@ -3,7 +3,7 @@ import moment from 'moment'
 import { connect } from 'react-redux'
 import PropTypes from 'prop-types'
 
-import { Card, Row, Col, Statistic, Icon, Descriptions, Anchor } from 'antd'
+import { Card, Row, Col, Statistic, Icon, Descriptions, Anchor, Button } from 'antd'
 import { LineChart, AreaChart, Line, Area, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
 
 import DataUnit from './DataUnit'
@@ -20,21 +20,35 @@ const CENTER_FLEX = { display: 'flex', justifyContent: 'center', alignContent: '
 class GithubStatistics extends React.Component {
   constructor(props) {
     super(props)
-    this.state={
-      repos:['vesoft-inc/nebula', 'facebook/react']
+
+    this.state = {
+      repos:['vesoft-inc/nebula', 'facebook/react'],
+      deleteRepo: ''
     }
     this.GithubFetcher = new GithubFetcher('05c1acf261f6b223411c73d8b71cb1a30ce9186a')
 
     this.props.updateState("githubApiToken", '05c1acf261f6b223411c73d8b71cb1a30ce9186a')
   }
 
-  deleteGithub(index){
-    const {repos}=this.state
+  deleteRepo = index => {
+    const { repos } = this.state
+    const deleteRepo = repos[index]
     repos.splice(index,1)
     this.setState({
-      repos:repos
+      repos,
+      // deleteRepo: deleteRepo,
     })
   }
+
+  addRepo = name => {
+    const { repos } = this.state
+    repos.push(name)
+    this.setState({
+      repos,
+      // deleteRepo: '',
+    })
+  }
+
   _fetchRepositoryData = () => ({
     type: this.GithubFetcher.fetchRepositoryData,
     onFinish: stats => {
@@ -371,7 +385,8 @@ class GithubStatistics extends React.Component {
 
   render() {
     // const dotStyle = {strokeWidth: 2, r: 2.5}
-    const {repos} =this.state
+    const { repos, deleteRepo} =this.state
+
     return (
       <Card bordered={false} className="section-div">
         <Anchor bounds={0} style={{ position: 'absolute', zIndex: 1000 }} >
@@ -380,7 +395,7 @@ class GithubStatistics extends React.Component {
           <Anchor.Link title="Fork" href="#Fork" />
           <Anchor.Link title="Release" href="#Release" />
         </Anchor>
-        
+
         <DataUnit
           id="Repository"
           title="Repository"
@@ -391,9 +406,18 @@ class GithubStatistics extends React.Component {
           {this._renderRepositoryStatistics()}
         </DataUnit>
 
+        <Button onClick={() => this.addRepo('vesoft-inc/nebula')}>
+          Add
+        </Button>
+        <Button onClick={() => this.addRepo('facebook/redux')}>
+          Add another
+        </Button>
+        <Button onClick={() => this.deleteRepo(0)}>
+          Delete
+        </Button>
         <GithubStarSection
           repos={repos}
-          deleteGithub={e=>this.deleteGithub(e)}
+          // deleteRepo={deleteRepo}
         />
 
         <DataUnit
