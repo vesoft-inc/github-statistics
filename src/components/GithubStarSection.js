@@ -20,22 +20,28 @@ class GithubStarSection extends React.Component {
   }
 
   static getDerivedStateFromProps(props, state) {
-
+    state.progress.delete(props.deleteNmae)
+    return state
   }
 
   /**
    * TODO
    * fetching for a specific repository
    */
-  _fetch = name => {
-
+  _fetch = (name) => {
+    console.log(name)
     this.fetcher.fetchStargazerData(
       // onUpdate
       data => {},
       // onFinish
       stats => {},
       // onProgres
-      progress => {}
+      progress => {
+        this.state.progress.set(name,progress)
+        this.setState({
+          progress:this.state.progress
+        })
+      }
 
     )
   }
@@ -50,11 +56,11 @@ class GithubStarSection extends React.Component {
     )
   }
 
-  _renderRepoTagButton = name => {
+  _renderRepoTagButton = (name,index) => {
     const { progress } = this.state
     return (
       <div style={{ display: 'inline-block'}}>
-        <Button onClick>
+        <Button onClick={e=>this._fetch(name)}>
           {name}
         </Button>
         <Progress
@@ -63,6 +69,9 @@ class GithubStarSection extends React.Component {
           showInfo={false}
           strokeWidth={5}
         />
+        <Button onClick={e=>this.props.deleteGithub(index)}>
+          删除
+        </Button>
       </div>
 
     )
@@ -72,7 +81,6 @@ class GithubStarSection extends React.Component {
   render() {
     const { ready } = this.state
     const { repos } = this.props
-
     return (
       <div id="github-star-section">
         <Row type="flex" align="middle">
@@ -95,8 +103,8 @@ class GithubStarSection extends React.Component {
           </Col>
         </Row>
         <Row>
-          {repos.map(name => (
-            this._renderRepoTagButton(name)
+          {repos.map((name ,index)=> (
+            this._renderRepoTagButton(name,index)
           ))}
         </Row>
         {ready}
