@@ -42,7 +42,6 @@ class GithubStatistics extends React.Component {
   deleteRepo = index => {
     const { repos } = this.state
     const deleteRepo = repos[index]
-    console.log(deleteRepo)
     repos.splice(index,1)
     this.setState({
       repos: [...repos],
@@ -439,6 +438,8 @@ class GithubStatistics extends React.Component {
     if (formatIncorrect) hintMessage = 'Incorrectly formatted input'
     if (inputEmpty) hintMessage = ''
 
+    const disabled = inputEmpty || formatIncorrect || repoExisted
+
     return (
       <React.Fragment>
         <Input
@@ -447,7 +448,7 @@ class GithubStatistics extends React.Component {
           placeholder="owner/name"
           value={input}
           onChange={e => this.setState({ input: e.target.value })}
-          onPressEnter={() => this.handleAdding(input)}
+          onPressEnter={() => !disabled && this.handleAdding(input)}
           disabled={testingRepo}
           allowClear
         />
@@ -458,9 +459,7 @@ class GithubStatistics extends React.Component {
             // style={{ display: 'inline-block'}}
             icon="plus"
             loading={testingRepo}
-            disabled={
-              inputEmpty || formatIncorrect || repoExisted
-            }
+            disabled={disabled}
             onClick={() => this.handleAdding(input)}
           >
             ADD

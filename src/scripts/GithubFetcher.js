@@ -65,9 +65,10 @@ class GithubFetcher {
    * @param onUpdate (data) function that will be called when a new data update is avaiable
    * @param onFinish (stats) function that will be called when fetching is finished
    * @param onProgress (progress) function that will be called when progress is updated
+   * @param shouldAbort function that returns a boolean which determines whether fetching should abort
    * @returns Object that contains statistics
    */
-  fetchRepositoryData = async (owner, name, onUpdate, onFinish, onProgress) => {
+  fetchRepositoryData = async (owner, name, onUpdate, onFinish, onProgress, shouldAbort) => {
     const variables = {
       owner: owner,
       name: name,
@@ -92,10 +93,16 @@ class GithubFetcher {
 
     // update progress tracking
     if (onProgress) {
-      onProgress(77)
+      onProgress(10)
     }
 
     const data = await this.gqlClient.request(query, variables)
+    // if (shouldAbort) {
+    //   if (shouldAbort()) {
+    //     return
+    //   }
+    // }
+
     const formattedData = {
       name: data.repository.nameWithOwner,
       createdAt: data.repository.createdAt,
@@ -117,13 +124,16 @@ class GithubFetcher {
   }
 
   /**
-   * fetch stargazers data
-   * @param onUpdate function that will be called when a new data update is avaiable
-   * @param onFinish (@param stats) function that will be called when fetching is finished
-   * @param onProgress (@param progress) function that will be called when progress is updated
+   * fetch repository low-level data
+   * @param owner owner of the repository
+   * @param name name of the repository
+   * @param onUpdate (data) function that will be called when a new data update is avaiable
+   * @param onFinish (stats) function that will be called when fetching is finished
+   * @param onProgress (progress) function that will be called when progress is updated
+   * @param shouldAbort function that returns a boolean which determines whether fetching should abort
    * @returns Object that contains statistics
    */
-  fetchStargazerData = async (owner, name, onUpdate, onFinish, onProgress) => {
+  fetchStargazerData = async (owner, name, onUpdate, onFinish, onProgress, shouldAbort) => {
     const preparationVariables = {
       owner: owner,
       name: name,
@@ -174,6 +184,13 @@ class GithubFetcher {
 
     // data traversal, 100 edges/request
     do {
+      if (shouldAbort) {
+        if (shouldAbort()) {
+          console.log(shouldAbort())
+          return
+        }
+      }
+
       const variables = {
         owner: owner,
         name: name,
@@ -233,9 +250,10 @@ class GithubFetcher {
    * @param onUpdate (data) function that will be called when a new data update is avaiable
    * @param onFinish (stats) function that will be called when fetching is finished
    * @param onProgress (progress) function that will be called when progress is updated
+   * @param shouldAbort function that returns a boolean which determines whether fetching should abort
    * @returns Object that contains statistics
    */
-  fetchForkData = async (owner, name, onUpdate, onFinish, onProgress) => {
+  fetchForkData = async (owner, name, onUpdate, onFinish, onProgress, shouldAbort) => {
     const preparationVariables = {
       owner: owner,
       name: name,
@@ -287,6 +305,11 @@ class GithubFetcher {
 
     // data traversal, 100 edges/request
     do {
+      if (shouldAbort) {
+        if (shouldAbort()) {
+          return
+        }
+      }
       const variables = {
         owner: owner,
         name: name,
@@ -346,9 +369,10 @@ class GithubFetcher {
    * @param onUpdate (data) function that will be called when a new data update is avaiable
    * @param onFinish (stats) function that will be called when fetching is finished
    * @param onProgress (progress) function that will be called when progress is updated
+   * @param shouldAbort function that returns a boolean which determines whether fetching should abort
    * @returns Object that contains statistics
    */
-  fetchReleaseData = async (owner, name, onUpdate, onFinish, onProgress) => {
+  fetchReleaseData = async (owner, name, onUpdate, onFinish, onProgress, shouldAbort) => {
     const variables = {
       owner: owner,
       name: name,
@@ -390,6 +414,11 @@ class GithubFetcher {
 
     // Preparation query
     const data = await this.gqlClient.request(query, variables)
+    // if (shouldAbort) {
+    //   if (shouldAbort()) {
+    //     return
+    //   }
+    // }
 
     // Statistics variables
     totalToFetch = data.repository.releases.nodes[0].releaseAssets.totalCount

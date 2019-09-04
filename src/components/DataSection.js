@@ -4,6 +4,7 @@ import { connect } from 'react-redux'
 // import _ from 'lodash'
 
 import TYPES from './DataTypes'
+import '../css/DataSection.css'
 
 import { Card, Progress, Button, Row, Col, Icon, Tag } from 'antd'
 import GithubFetcher from '../scripts/GithubFetcher'
@@ -15,6 +16,7 @@ class DataSection extends React.Component {
     this.state = {
       progress: new Map(),
       data: new Map(),
+      stats: new Map(),
       visible: new Map(),
       loading: false,
       ready: false,
@@ -26,13 +28,13 @@ class DataSection extends React.Component {
 
   componentDidUpdate(prevProps) {
     const { deleteRepo, repos } = this.props
-    const { data, progress, visible } = this.state
+    const { data, progress, visible, loading } = this.state
 
     // delete repo out
     if (deleteRepo !== prevProps.deleteRepo && deleteRepo !== '') {
       data.delete(deleteRepo)
       progress.delete(deleteRepo)
-      this.setState({ data, progress })
+      this.setState({ data, progress, loading: this._getAllProgress() !== 100 && loading && repos.length !== 0 })
     }
 
     // new repo in
@@ -42,6 +44,9 @@ class DataSection extends React.Component {
         visible.set(repo, true)
         progress.set(repo, 0)
         this.setState({ visible, progress })
+        if (loading) {
+          this._fetch(repo)
+        }
       })
     }
   }
@@ -53,24 +58,37 @@ class DataSection extends React.Component {
    * @returns exit status string
    */
   _fetch = repo => {
-    const { type } = this.props
+    const { type, repos } = this.props
     const slashIndex = repo.indexOf('/')
     const owner = repo.slice(0, slashIndex)
     const name = repo.slice(slashIndex + 1)
+
     const onUpdate = data => {
-      this.state.data.set(repo, data)
+      if(this.state.data.has(repo)) {
+        this.state.data.set(repo, data)
+      }
     }
     const onFinish = stats => {
-      this.state.data.set(repo, stats)
+      if(this.state.stats.has(repo)) {
+        this.state.stats.set(repo, stats)
+      }
       if (this._getAllProgress() === 100) {
         this.setState({ loading: false })
       }
     }
     const onProgress = progress => {
-      this.state.progress.set(repo,progress)
+      if(this.state.progress.has(repo)) {
+        this.state.progress.set(repo,progress)
+      }
       this.setState({
         progress:this.state.progress
       })
+    }
+    const shouldAbort = () => {
+      // if (this._getAllProgress() === 100) {
+      //   this.setState({ loading: false })
+      // }
+      return !repos.includes(repo)
     }
 
     switch (type) {
@@ -79,7 +97,8 @@ class DataSection extends React.Component {
           owner, name,
           onUpdate,
           onFinish,
-          onProgress
+          onProgress,
+          shouldAbort,
         )
         break
       default:
@@ -140,8 +159,8 @@ class DataSection extends React.Component {
             strokeWidth={20}
             width={20}
           />
-          <Tag.CheckableTag
-            className="repo-tag.checkable-tag"
+          <Tag
+            className="repo-tag"
             checked={visible.get(repo)}
             onChange={checked => {
               visible.set(repo, checked)
@@ -149,7 +168,7 @@ class DataSection extends React.Component {
             }}
           >
             {repo}
-          </Tag.CheckableTag>
+          </Tag>
         </div>
       ))
     )

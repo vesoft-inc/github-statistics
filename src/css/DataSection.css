@@ -1,3 +1,4 @@
-.repo-tag.checkable-tag {
-  display: inline-block;
+.ant-tag.repo-tag {
+  border-width: 0;
+  background: 0%;
 }
