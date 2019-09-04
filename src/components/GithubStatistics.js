@@ -5,7 +5,7 @@ import PropTypes from 'prop-types'
 
 import TYPES from './DataTypes'
 
-import { Card, Row, Col, Statistic, Icon, Descriptions, Anchor, Button, Input, Tag, Tooltip } from 'antd'
+import { Card, Row, Col, Statistic, Icon, Descriptions, Anchor, Button, Input, Tag, Tooltip, message } from 'antd'
 import { LineChart, AreaChart, Line, Area, CartesianGrid, XAxis, YAxis, ResponsiveContainer, Tooltip as ChartToolTip } from 'recharts'
 
 import DataUnit from './DataUnit'
@@ -26,8 +26,10 @@ class GithubStatistics extends React.Component {
     this.state = {
       repos:[],
       input: '',
+      testingRepo: false,
       deleteRepo: '',
     }
+
     this.GithubFetcher = new GithubFetcher('05c1acf261f6b223411c73d8b71cb1a30ce9186a')
 
     this.props.updateState("githubApiToken", '05c1acf261f6b223411c73d8b71cb1a30ce9186a')
@@ -44,12 +46,31 @@ class GithubStatistics extends React.Component {
     })
   }
 
-  addRepo = name => {
+  addRepo = repo => {
     const { repos } = this.state
     this.setState({
-      repos: [ ...repos, name],
+      repos: [ ...repos, repo],
       deleteRepo: '',
     })
+  }
+
+  handleAdding = repo => {
+    const slashIndex = repo.indexOf('/')
+    const owner = repo.slice(0, slashIndex)
+    const name = repo.slice(slashIndex + 1)
+
+    this.setState({ testingRepo: true })
+    this.GithubFetcher.testRepository(owner, name,
+      result => {
+        this.setState({ testingRepo: false })
+        if (result) {
+          this.addRepo(repo)
+          message.success(repo + ' added')
+        } else {
+          message.error('Repository not found')
+        }
+      }
+    )
   }
 
   _fetchRepositoryData = () => ({
@@ -398,9 +419,56 @@ class GithubStatistics extends React.Component {
     )
   }
 
+  _renderHeaderInput = () => {
+    const { repos, input, testingRepo } = this.state
+
+    const format = /^[a-z\d](?:[a-z\d]|-(?=[a-z\d])){0,38}\/{1}[a-z\d](?:[a-z\d]|-(?=[a-z\d])){0,38}$/i
+
+    let hintMessage = ''
+
+    // Conditions
+    const inputEmpty = input === ''
+    const formatIncorrect = !format.test(input)
+    const repoExisted = repos.includes(input)
+
+    if (repoExisted) hintMessage = 'Repository already added'
+    if (formatIncorrect) hintMessage = 'Incorrectly formatted input'
+    if (inputEmpty) hintMessage = ''
+
+    return (
+      <React.Fragment>
+        <Input
+          className="header-input"
+          prefix={<Icon type="github"/>}
+          placeholder="owner/name"
+          value={input}
+          onChange={e => this.setState({ input: e.target.value })}
+          onPressEnter
+          disabled={testingRepo}
+          allowClear
+        />
+        <Tooltip
+          title={hintMessage}
+        >
+          <Button
+            // style={{ display: 'inline-block'}}
+            icon="plus"
+            loading={testingRepo}
+            disabled={
+              inputEmpty || formatIncorrect || repoExisted
+            }
+            onClick={() => this.handleAdding(input)}
+          >
+            ADD
+          </Button>
+        </Tooltip>
+      </React.Fragment>
+    )
+  }
+
   render() {
     // const dotStyle = {strokeWidth: 2, r: 2.5}
-    const { repos, deleteRepo, input} = this.state
+    const { repos, deleteRepo } = this.state
 
     return (
       <div className="container">
@@ -413,26 +481,7 @@ class GithubStatistics extends React.Component {
                 </span>
               </Col>
               <Col span={6} className="flex-center">
-                <Input
-                  className="header-input"
-                  placeholder="owner/name"
-                  value={input}
-                  onChange={e => this.setState({ input: e.target.value })}
-                  onPressEnter
-                />
-                <Tooltip>
-                  <Button
-                  // style={{ display: 'inline-block'}}
-                    disabled={
-                      input === ''
-                    || repos.includes(input)
-                    }
-                    onClick={() => this.addRepo(input)}
-                  >
-                  Add Repo
-                  </Button>
-                </Tooltip>
-
+                {this._renderHeaderInput()}
               </Col>
               <Col span={12} className="flex-center-left header-section">
                 {this._renderTags()}
@@ -450,7 +499,14 @@ class GithubStatistics extends React.Component {
               <Anchor.Link title="Release" href="#Release" />
             </Anchor>
 
-            <DataUnit
+            <DataSection
+              id="Star"
+              type={TYPES.STAR}
+              repos={repos}
+              deleteRepo={deleteRepo}
+            />
+
+            {/* <DataUnit
               id="Repository"
               title="Repository"
               iconType="book"
@@ -459,12 +515,6 @@ class GithubStatistics extends React.Component {
             >
               {this._renderRepositoryStatistics()}
             </DataUnit>
-
-            <DataSection
-              type={TYPES.STAR}
-              repos={repos}
-              deleteRepo={deleteRepo}
-            />
 
             <DataUnit
               id="Star"
@@ -496,7 +546,7 @@ class GithubStatistics extends React.Component {
               action={this._fetchReleaseData()}
             >
               {this._renderReleaseStatistics()}
-            </DataUnit>
+            </DataUnit> */}
           </Card>
         </div>
       </div>

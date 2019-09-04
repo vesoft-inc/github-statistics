@@ -23,22 +23,51 @@ class GithubFetcher {
   }
 
   /**
-   * reset class fields to default
+   * test if the repository exists
+   * @param owner owner of the repository
+   * @param name of the repository
+   * @param onResult (@param result) function that will be called when test finishes
+   * @return false if not exist, true otherwise
    */
-  reset = () => {
-    this.fetching = false  }
+  testRepository = async (owner, name, onResult) => {
+    const variables = {
+      owner: owner,
+      name: name,
+    }
+
+    const query = /* GraphQL */ `
+      query getRepository($owner: String!, $name: String!){
+        repository(owner: $owner, name: $name) {
+          id
+        }
+      }
+    `
+
+    try {
+      await this.gqlClient.request(query, variables)
+    } catch (error) {
+      if (onResult) {
+        onResult(false)
+      }
+      return false
+    }
+
+    if (onResult) {
+      onResult(true)
+    }
+    return true
+  }
 
   /**
    * fetch repository low-level data
-   * @param onUpdate (@param data) function that will be called when a new data update is avaiable
-   * @param onFinish function that will be called when fetching is finished
-   * @param onProgress function that will be called when progress is updated
+   * @param owner owner of the repository
+   * @param name name of the repository
+   * @param onUpdate (data) function that will be called when a new data update is avaiable
+   * @param onFinish (stats) function that will be called when fetching is finished
+   * @param onProgress (progress) function that will be called when progress is updated
    * @returns Object that contains statistics
    */
-  fetchRepositoryData = async (onUpdate, onFinish, onProgress) => {
-    const owner = 'vesoft-inc'
-    const name = 'nebula'
-
+  fetchRepositoryData = async (owner, name, onUpdate, onFinish, onProgress) => {
     const variables = {
       owner: owner,
       name: name,
@@ -90,16 +119,11 @@ class GithubFetcher {
   /**
    * fetch stargazers data
    * @param onUpdate function that will be called when a new data update is avaiable
-   * @param onFinish function that will be called when fetching is finished
-   * @param onProgress function that will be called when progress is updated
+   * @param onFinish (@param stats) function that will be called when fetching is finished
+   * @param onProgress (@param progress) function that will be called when progress is updated
    * @returns Object that contains statistics
    */
-  fetchStargazerData = async (onUpdate, onFinish, onProgress) => {
-    // const owner = 'facebook'
-    // const name = 'react'
-    const owner = 'vesoft-inc'
-    const name = 'nebula'
-
+  fetchStargazerData = async (owner, name, onUpdate, onFinish, onProgress) => {
     const preparationVariables = {
       owner: owner,
       name: name,
@@ -199,24 +223,19 @@ class GithubFetcher {
       })
     }
 
-    this.reset()
-
     return formattedData
   }
 
   /**
    * fetch fork data
-   * @param onUpdate (@param data) function that will be called when a new data update is avaiable
-   * @param onFinish function that will be called when fetching is finished
-   * @param onProgress function that will be called when progress is updated
+   * @param owner owner of the repository
+   * @param name name of the repository
+   * @param onUpdate (data) function that will be called when a new data update is avaiable
+   * @param onFinish (stats) function that will be called when fetching is finished
+   * @param onProgress (progress) function that will be called when progress is updated
    * @returns Object that contains statistics
    */
-  fetchForkData = async (onUpdate, onFinish, onProgress) => {
-    // const owner = 'graphql-go'
-    // const name = 'graphql'
-    const owner = 'vesoft-inc'
-    const name = 'nebula'
-
+  fetchForkData = async (owner, name, onUpdate, onFinish, onProgress) => {
     const preparationVariables = {
       owner: owner,
       name: name,
@@ -317,24 +336,19 @@ class GithubFetcher {
       })
     }
 
-    this.reset()
-
     return formattedData
   }
 
   /**
    * fetch release data
-   * @param onUpdate (@param data) function that will be called when a new data update is avaiable
-   * @param onFinish function that will be called when fetching is finished
-   * @param onProgress function that will be called when progress is updated
+   * @param owner owner of the repository
+   * @param name name of the repository
+   * @param onUpdate (data) function that will be called when a new data update is avaiable
+   * @param onFinish (stats) function that will be called when fetching is finished
+   * @param onProgress (progress) function that will be called when progress is updated
    * @returns Object that contains statistics
    */
-  fetchReleaseData = async (onUpdate, onFinish, onProgress) => {
-    // const owner = 'graphql-go'
-    // const name = 'graphql'
-    const owner = 'vesoft-inc'
-    const name = 'nebula'
-
+  fetchReleaseData = async (owner, name, onUpdate, onFinish, onProgress) => {
     const variables = {
       owner: owner,
       name: name,
@@ -413,8 +427,6 @@ class GithubFetcher {
         createdAt: data.repository.releases.nodes[0].createdAt
       })
     }
-
-    this.reset()
 
     return formattedData
   }

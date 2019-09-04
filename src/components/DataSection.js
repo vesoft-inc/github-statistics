@@ -49,16 +49,19 @@ class DataSection extends React.Component {
    * fetching from a specific repository
    * for a specific data type from DataTypes.js
    */
-  _fetch = name => {
+  _fetch = repo => {
     const { type } = this.props
+    const slashIndex = repo.indexOf('/')
+    const owner = repo.slice(0, slashIndex)
+    const name = repo.slice(slashIndex + 1)
     const onUpdate = data => {
-      this.state.data.set(name, data)
+      this.state.data.set(repo, data)
     }
     const onFinish = stats => {
-      this.state.data.set(name, stats)
+      this.state.data.set(repo, stats)
     }
     const onProgress = progress => {
-      this.state.progress.set(name,progress)
+      this.state.progress.set(repo,progress)
       this.setState({
         progress:this.state.progress
       })
@@ -67,6 +70,7 @@ class DataSection extends React.Component {
     switch (type) {
       case TYPES.STAR:
         this.fetcher.fetchStargazerData(
+          owner, name,
           onUpdate,
           onFinish,
           onProgress
@@ -97,7 +101,7 @@ class DataSection extends React.Component {
           disabled={repos.length === 0}
           onClick={() => {
             this.setState({ init: false })
-            repos.forEach(name => this._fetch(name))
+            repos.forEach(repo => this._fetch(repo))
           }}
           loading={!init && allLoading}
         >

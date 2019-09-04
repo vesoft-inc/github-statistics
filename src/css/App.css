@@ -10,7 +10,7 @@
   width: 100%;
   background-color: #ffffff;
   z-index: 10;
-  padding: 12px 80px;
+  padding: 12px 64px;
   /* font-size: calc(10px + 2vmin); */
   box-shadow: 0 2px 8px #f0f1f2;
 }
