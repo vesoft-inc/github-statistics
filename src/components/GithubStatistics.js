@@ -8,7 +8,6 @@ import TYPES from './DataTypes'
 import { Card, Row, Col, Statistic, Icon, Descriptions, Anchor, Button, Input, Tag, Tooltip, message } from 'antd'
 import { LineChart, AreaChart, Line, Area, CartesianGrid, XAxis, YAxis, ResponsiveContainer, Tooltip as ChartToolTip } from 'recharts'
 
-import DataUnit from './DataUnit'
 import DataSection from './DataSection'
 
 import GithubFetcher from '../scripts/GithubFetcher'
@@ -18,6 +17,11 @@ import { updateState, updateStatsField } from '../actions'
 const CENTER_FLEX = { display: 'flex', placeContent: 'center' }
 const CENTER_LEFT_FLEX = { display: 'flex', justifyContent: 'flex-start', alignContent: 'center'}
 
+// message.config({
+//   top: 60,
+//   duration: 2,
+//   maxCount: 5,
+// })
 
 class GithubStatistics extends React.Component {
   constructor(props) {
@@ -443,7 +447,7 @@ class GithubStatistics extends React.Component {
           placeholder="owner/name"
           value={input}
           onChange={e => this.setState({ input: e.target.value })}
-          onPressEnter
+          onPressEnter={() => this.handleAdding(input)}
           disabled={testingRepo}
           allowClear
         />

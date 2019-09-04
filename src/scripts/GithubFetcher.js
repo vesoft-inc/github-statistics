@@ -1,7 +1,7 @@
 import {  } from 'graphql'
 import { GraphQLClient } from 'graphql-request'
 
-const getProgress = (c, t) => Math.floor(c / t * 100)
+const getProgress = (c, t) => t === 0 ? 100 : Math.floor(c / t * 100)
 
 class GithubFetcher {
 

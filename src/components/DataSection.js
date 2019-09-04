@@ -16,7 +16,8 @@ class DataSection extends React.Component {
       progress: new Map(),
       data: new Map(),
       visible: new Map(),
-      init: true, // indicate wether this is initially rendered
+      loading: false,
+      ready: false,
     }
 
     const { githubApiToken } = this.props
@@ -48,6 +49,8 @@ class DataSection extends React.Component {
   /**
    * fetching from a specific repository
    * for a specific data type from DataTypes.js
+   * @param repo repo to fectch
+   * @returns exit status string
    */
   _fetch = repo => {
     const { type } = this.props
@@ -59,6 +62,9 @@ class DataSection extends React.Component {
     }
     const onFinish = stats => {
       this.state.data.set(repo, stats)
+      if (this._getAllProgress() === 100) {
+        this.setState({ loading: false })
+      }
     }
     const onProgress = progress => {
       this.state.progress.set(repo,progress)
@@ -83,16 +89,19 @@ class DataSection extends React.Component {
     return 'FETCH REQUESTED'
   }
 
+  /**
+   * get progress of fetching all
+   * @returns progress as number from 0 to 100
+   */
+  _getAllProgress = () => {
+    const { progress } = this.state
+    return Array.from(progress.values()).reduce((a, b) => a + b, 0)
+    / (progress.size === 0 ? 1 : progress.size)
+  }
+
   _renderUpdateAllButton = () => {
-    const { progress, init } = this.state
+    const { loading } = this.state
     const { repos } = this.props
-
-    const allProgress =
-      Array.from(progress.values()).reduce((a, b) => a + b, 0)
-      / (progress.size === 0 ? 1 : progress.size)
-
-    // console.log(allProgress)
-    const allLoading = allProgress !== 100
 
     return (
       <div style={{ display: 'inline-block'}}>
@@ -100,16 +109,16 @@ class DataSection extends React.Component {
           icon="cloud-download"
           disabled={repos.length === 0}
           onClick={() => {
-            this.setState({ init: false })
+            this.setState({ loading: true })
             repos.forEach(repo => this._fetch(repo))
           }}
-          loading={!init && allLoading}
+          loading={loading}
         >
           Update All
         </Button>
         <Progress
           style={{ lineHeight: 0.7, display: 'block'}}
-          percent={allProgress}
+          percent={this._getAllProgress()}
           showInfo={false}
           strokeWidth={5}
         />
