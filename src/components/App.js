@@ -4,7 +4,7 @@ import '../css/App.css'
 class App extends React.Component {
   render() {
     return (
-      <div id="App">
+      <div>
         <GithubStatistics />
       </div>
     )

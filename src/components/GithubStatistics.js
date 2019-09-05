@@ -292,64 +292,7 @@ class GithubStatistics extends React.Component {
     )
   }
 
-  _renderStarCharts = () => (
-    <div>
-      <Row>
-        Total Stars
-      </Row>
-      <Row>
-        <Card bordered={false} bodyStyle={CENTER_FLEX}>
-          <ResponsiveContainer width="80%" height={300}>
-            <AreaChart data={this._getStarTotalData()}>
-              <defs>
-                <linearGradient id="starGradientArea" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#ffb900" stopOpacity={0.8}/>
-                  <stop offset="95%" stopColor="#ffb900" stopOpacity={0}/>
-                </linearGradient>
-              </defs>
-              <Area type="monotone" dataKey="stars" stroke="#ffb900" fill={"url(#starGradientArea)"} dot={false}/>
-              <CartesianGrid stroke="#ccc" strokeDasharray="2 7" />
-              <XAxis
-                dataKey="date"
-                domain = {['auto', 'auto']}
-                type="number"
-                tickFormatter={ms => new Date(ms).toISOString().slice(0,10)}
-              />
-              <YAxis />
-              <ChartToolTip
-              // formatter={(value, name) => [value, new Date(name).toISOString().slice(0,10)]}
-                labelFormatter={ms => new Date(ms).toISOString().slice(0,10)}
-              />
-            </AreaChart>
-          </ResponsiveContainer>
-        </Card>
-      </Row>
-      <Row>
-        Daily increment
-      </Row>
-      <Row>
-        <Card bordered={false} bodyStyle={CENTER_FLEX}>
-          <ResponsiveContainer width="80%" height={300}>
-            <LineChart data={this._getStarIncrementData()}>
-              <Line type="monotone" dataKey="stars" stroke="#ffb900" dot={false}/>
-              <CartesianGrid stroke="#ccc" strokeDasharray="3 7" />
-              <XAxis
-                dataKey="date"
-                domain = {['auto', 'auto']}
-                type="number"
-                tickFormatter={ms => new Date(ms).toISOString().slice(0,10)}
-              />
-              <YAxis />
-              <ChartToolTip
-                // formatter={(value, name) => [value, new Date(name).toISOString().slice(0,10)]}
-                labelFormatter={ms => new Date(ms).toISOString().slice(0,10)}
-              />
-            </LineChart>
-          </ResponsiveContainer>
-        </Card>
-      </Row>
-    </div>
-  )
+
 
   _renderForkCharts = () => (
     <div>
@@ -435,13 +378,14 @@ class GithubStatistics extends React.Component {
     const repoExisted = repos.includes(input)
 
     if (repoExisted) hintMessage = 'Repository already added'
-    if (formatIncorrect) hintMessage = 'Incorrectly formatted input'
-    if (inputEmpty) hintMessage = ''
+    if (formatIncorrect) hintMessage = 'Input incorrectly formatted'
+    if (inputEmpty) hintMessage = 'Empty'
 
     const disabled = inputEmpty || formatIncorrect || repoExisted
 
     return (
       <React.Fragment>
+        
         <Input
           className="header-input"
           prefix={<Icon type="github"/>}
@@ -474,34 +418,35 @@ class GithubStatistics extends React.Component {
     const { repos, deleteRepo } = this.state
 
     return (
-      <div className="container">
+      <div>
         <header>
-          <div id="header">
+          <div className="header">
             <Row type="flex" align="middle">
-              <Col span={4}>
+              <Col className="header-section">
                 <span className="header-title">
                   Github Stats
                 </span>
               </Col>
-              <Col span={6} className="flex-center">
+              <Col className="header-section flex-center">
                 {this._renderHeaderInput()}
               </Col>
-              <Col span={12} className="flex-center-left header-section">
+              <Col className="header-section flex-center-left">
                 {this._renderTags()}
               </Col>
             </Row>
-
           </div>
         </header>
-        <div>
-          <Card bordered={false} className="body" >
-            <Anchor bounds={0} style={{ position: 'absolute', zIndex: 1000 }} >
+        <div className="container">
+          <div className="sider">
+            <Anchor bounds={0} className="anchor">
               <Anchor.Link title="Repository" href="#Repository" />
               <Anchor.Link title="Star" href="#Star" />
               <Anchor.Link title="Fork" href="#Fork" />
               <Anchor.Link title="Release" href="#Release" />
             </Anchor>
+          </div>
 
+          <div className="content" >
             <DataSection
               id="Star"
               type={TYPES.STAR}
@@ -550,7 +495,7 @@ class GithubStatistics extends React.Component {
             >
               {this._renderReleaseStatistics()}
             </DataUnit> */}
-          </Card>
+          </div>
         </div>
       </div>
     )

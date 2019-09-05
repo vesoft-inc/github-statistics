@@ -9,6 +9,8 @@ import '../css/DataSection.css'
 import { Card, Progress, Button, Row, Col, Icon, Tag } from 'antd'
 import GithubFetcher from '../scripts/GithubFetcher'
 
+import Star from './sections/Star'
+
 class DataSection extends React.Component {
   constructor(props) {
     super(props)
@@ -18,8 +20,8 @@ class DataSection extends React.Component {
       data: new Map(),
       stats: new Map(),
       visible: new Map(),
+      ready: new Map(),
       loading: false,
-      ready: false,
     }
 
     const { githubApiToken } = this.props
@@ -28,22 +30,28 @@ class DataSection extends React.Component {
 
   componentDidUpdate(prevProps) {
     const { deleteRepo, repos } = this.props
-    const { data, progress, visible, loading } = this.state
+    const { data, stats, progress, visible, loading, ready } = this.state
 
     // delete repo out
     if (deleteRepo !== prevProps.deleteRepo && deleteRepo !== '') {
       data.delete(deleteRepo)
+      stats.delete(deleteRepo)
       progress.delete(deleteRepo)
-      this.setState({ data, progress, loading: this._getAllProgress() !== 100 && loading && repos.length !== 0 })
+      ready.delete(deleteRepo)
+      visible.delete(deleteRepo)
+      this.setState({ data, stats, progress, ready, visible, loading: this._getAllProgress() !== 100 && loading && repos.length !== 0 })
     }
 
     // new repo in
     if (prevProps.repos !== repos && deleteRepo === '') {
       const newRepo = repos.filter(repo => !prevProps.repos.includes(repo))
       newRepo.forEach(repo => {
-        visible.set(repo, true)
+        data.set(repo, {})
+        stats.set(repo, {})
         progress.set(repo, 0)
-        this.setState({ visible, progress })
+        ready.set(repo, false)
+        visible.set(repo, true)
+        this.setState({ data, stats, progress, ready, visible })
         if (loading) {
           this._fetch(repo)
         }
@@ -66,11 +74,14 @@ class DataSection extends React.Component {
     const onUpdate = data => {
       if(this.state.data.has(repo)) {
         this.state.data.set(repo, data)
+        this.setState({ data: this.state.data })
       }
     }
     const onFinish = stats => {
       if(this.state.stats.has(repo)) {
         this.state.stats.set(repo, stats)
+        this.state.ready.set(repo, true)
+        this.setState({ stats: this.state.stats, ready: this.state.ready})
       }
       if (this._getAllProgress() === 100) {
         this.setState({ loading: false })
@@ -79,10 +90,10 @@ class DataSection extends React.Component {
     const onProgress = progress => {
       if(this.state.progress.has(repo)) {
         this.state.progress.set(repo,progress)
+        this.setState({
+          progress:this.state.progress
+        })
       }
-      this.setState({
-        progress:this.state.progress
-      })
     }
     const shouldAbort = () => {
       // if (this._getAllProgress() === 100) {
@@ -145,7 +156,7 @@ class DataSection extends React.Component {
     )
   }
 
-  _renderRepoTagButtons = () => {
+  _renderRepoTags = () => {
     const { progress, visible } = this.state
     const { repos } = this.props
 
@@ -174,9 +185,24 @@ class DataSection extends React.Component {
     )
   }
 
+  _renderBody = () => {
+    const { data, stats, ready } = this.state
+    const { type, repos } = this.props
+
+    let body = <div />
+
+    switch (type) {
+      case TYPES.STAR:
+        body = <Star repos={repos} data={data} stats={stats} ready={ready}/>
+        break
+      default:
+        console.log('TYPE DOESNOT EXIST')
+    }
+
+    return body
+  }
 
   render() {
-    const { ready } = this.state
     return (
       <div id="github-star-section">
         <Row type="flex" align="middle">
@@ -188,7 +214,7 @@ class DataSection extends React.Component {
           <Col span={8}>
             <Card bordered={false}>
               <div className="section-title">
-                Star Trend _RE
+                Star
               </div>
             </Card>
           </Col>
@@ -199,9 +225,9 @@ class DataSection extends React.Component {
           </Col>
         </Row>
         <Row>
-          {this._renderRepoTagButtons()}
+          {this._renderRepoTags()}
         </Row>
-        {ready}
+        {this._renderBody()}
       </div>
     )
   }
