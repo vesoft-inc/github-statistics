@@ -207,21 +207,21 @@ class DataSection extends React.Component {
       <div id="github-star-section">
         <Row type="flex" align="middle">
           <Col span={8}>
-            <Card bordered={false}>
+            <div className="data-card">
               <Icon type="star" style={{ fontSize: '32px', color: '#ffb900' }} />
-            </Card>
+            </div>
           </Col>
           <Col span={8}>
-            <Card bordered={false}>
+            <div className="data-card">
               <div className="section-title">
                 Star
               </div>
-            </Card>
+            </div>
           </Col>
           <Col span={8}>
-            <Card bordered={false}>
+            <div className="data-card">
               {this._renderUpdateAllButton()}
-            </Card>
+            </div>
           </Col>
         </Row>
         <Row>

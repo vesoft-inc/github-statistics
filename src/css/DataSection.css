@@ -1,3 +1,8 @@
+
+.data-card {
+  padding: 24px;
+}
+
 .ant-tag.repo-tag {
   border-width: 0;
   background: 0%;

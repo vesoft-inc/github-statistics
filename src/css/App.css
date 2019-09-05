@@ -21,8 +21,6 @@
 .content {
   text-align: center;
   width: 100%;
-  background-color: #FFFFFF;
-  /* display: block; */
 }
 
 /* Global reusable */
@@ -84,19 +82,11 @@ a:hover {
 }
 
 .ant-anchor-ink-ball {
-  position: absolute;
-  left: 50%;
-  display: none;
   width: 1px;
   height: 8px;
   background-color: #fff;
   border: 1px solid #222;
   border-radius: 8px;
-  -webkit-transform: translateX(-50%);
-  -ms-transform: translateX(-50%);
-  transform: translateX(-50%);
-  -webkit-transition: top 0.3s ease-in-out;
-  transition: top 0.3s ease-in-out;
 }
 
 .ant-anchor-link-title.ant-anchor-link-title-active {
