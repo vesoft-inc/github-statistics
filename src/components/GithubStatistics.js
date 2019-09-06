@@ -385,7 +385,6 @@ class GithubStatistics extends React.Component {
 
     return (
       <React.Fragment>
-        
         <Input
           className="header-input"
           prefix={<Icon type="github"/>}
@@ -400,7 +399,6 @@ class GithubStatistics extends React.Component {
           title={hintMessage}
         >
           <Button
-            // style={{ display: 'inline-block'}}
             icon="plus"
             loading={testingRepo}
             disabled={disabled}

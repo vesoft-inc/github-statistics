@@ -2,7 +2,7 @@ import React from 'react'
 import PropTypes from 'prop-types'
 
 import { Card, Row, Col, Statistic, Icon, Descriptions, Anchor, Button, Input, Tag, Tooltip, message } from 'antd'
-import { LineChart, AreaChart, Line, Area, CartesianGrid, XAxis, YAxis, ResponsiveContainer, Tooltip as ChartToolTip } from 'recharts'
+import { LineChart, AreaChart, Line, Area, CartesianGrid, XAxis, YAxis, ResponsiveContainer, Brush, Tooltip as ChartToolTip } from 'recharts'
 
 
 const CENTER_FLEX = { display: 'flex', placeContent: 'center' }
@@ -23,20 +23,21 @@ class Star extends React.Component {
 
   _getStarTotalData = () => {
     const { data, ready } = this.props
-    const formattedData = []
+    const series = []
     data.forEach((datamap, repo) => {
       let cumulativeStarCount = 0
+      let data = []
       if (!ready.get(repo)) return
       datamap.forEach((value, key) => {
         cumulativeStarCount += value
-        formattedData.push({
+        data.push({
           date: key,
-          [repo]: cumulativeStarCount,
+          value: cumulativeStarCount,
         })
       })
+      series.push({ name: repo, data })
     })
-    console.log(formattedData)
-    return formattedData
+    return series
   }
 
   _renderStatistics = () => {
@@ -73,10 +74,11 @@ class Star extends React.Component {
   }
 
   _renderCharts = () => {
-    const { repos, ready } = this.props
+    const { ready } = this.props
 
     if (!Array.from(ready.values()).includes(true)) return
 
+    const seriesStarTotal = this._getStarTotalData()
     return (
       <div>
         <Row>
@@ -85,29 +87,37 @@ class Star extends React.Component {
         <Row>
           <Card bordered={false} bodyStyle={CENTER_FLEX}>
             <ResponsiveContainer width="80%" height={300}>
-              <AreaChart data={this._getStarTotalData()}>
+              <AreaChart>
                 <defs>
                   <linearGradient id="starGradientArea" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="5%" stopColor="#ffb900" stopOpacity={0.8}/>
                     <stop offset="95%" stopColor="#ffb900" stopOpacity={0}/>
                   </linearGradient>
                 </defs>
-                {repos.map(repo => (
-                  ready.get(repo) && <Area key={"star-chart-area" + repo} type="monotone" dataKey={repo} stroke="#ffb900" fill={"url(#starGradientArea)"} dot={false}/>
-                ))}
                 <CartesianGrid stroke="#ccc" strokeDasharray="2 7" />
+                <Brush data={seriesStarTotal} dataKey="date"/>
                 <XAxis
                   dataKey="date"
                   scale="time"
-                  domain = {['dataMin', 'dataMax']}
+                  allowDuplicatedCategory={false}
                   type="number"
+                  domain = {['auto', 'auto']}
                   tickFormatter={ms => new Date(ms).toISOString().slice(0,10)}
                 />
-                <YAxis />
-                <ChartToolTip
-                  // formatter={(value, name) => [value, new Date(name).toISOString().slice(0,10)]}
-                  labelFormatter={ms => new Date(ms).toISOString().slice(0,10)}
-                />
+                <YAxis dataKey="value"/>
+                <ChartToolTip labelFormatter={ms => new Date(ms).toISOString().slice(0,10)}/>
+                {seriesStarTotal.map(serie => (
+                  <Area
+                    type="monotone"
+                    key={"star-chart-area" + serie.name}
+                    data={serie.data}
+                    dataKey="value"
+                    name={serie.name}
+                    stroke="#ffb900"
+                    fill={"url(#starGradientArea)"}
+                    dot={false}
+                  />
+                ))}
               </AreaChart>
             </ResponsiveContainer>
           </Card>

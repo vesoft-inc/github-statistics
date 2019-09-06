@@ -130,7 +130,7 @@ class DataSection extends React.Component {
   }
 
   _renderUpdateAllButton = () => {
-    const { loading } = this.state
+    const { loading, ready } = this.state
     const { repos } = this.props
 
     return (
@@ -140,11 +140,20 @@ class DataSection extends React.Component {
           disabled={repos.length === 0}
           onClick={() => {
             this.setState({ loading: true })
-            repos.forEach(repo => this._fetch(repo))
+            if (this._getAllProgress() === 100) { // re-fetch all
+              repos.forEach(repo => this._fetch(repo))
+            }
+            else { // on fetch unfetched
+              repos.forEach(repo => {
+                if (!ready.get(repo)) {
+                  this._fetch(repo)
+                }
+              })
+            }
           }}
           loading={loading}
         >
-          Update All
+          Update
         </Button>
         <Progress
           style={{ lineHeight: 0.7, display: 'block'}}
