@@ -2,24 +2,30 @@ import React from 'react'
 import PropTypes from 'prop-types'
 
 import { Card, Row, Col, Statistic, Icon, Descriptions, Anchor, Button, Input, Tag, Tooltip, message } from 'antd'
-import { LineChart, AreaChart, Line, Area, CartesianGrid, XAxis, YAxis, ResponsiveContainer, Brush, Tooltip as ChartToolTip } from 'recharts'
+import { LineChart, Label, AreaChart, Line, Area, CartesianGrid, XAxis, YAxis, ResponsiveContainer, Legend, Tooltip as ChartToolTip } from 'recharts'
 
+import COLORS from './Colors'
 
 const CENTER_FLEX = { display: 'flex', placeContent: 'center' }
 
 class Star extends React.Component {
 
-  // _getStarIncrementData = () => {
-  //   const { data } = this.props
-  //   const formattedData = []
-  //   data.forEach((value, key) => {
-  //     formattedData.push({
-  //       date: key,
-  //       stars: value,
-  //     })
-  //   })
-  //   return formattedData
-  // }
+  _getStarIncrementData = () => {
+    const { data, ready } = this.props
+    const series = []
+    data.forEach((datamap, repo) => {
+      let data = []
+      if (!ready.get(repo)) return
+      datamap.forEach((value, key) => {
+        data.push({
+          date: key,
+          value: value,
+        })
+      })
+      series.push({ name: repo, data })
+    })
+    return series
+  }
 
   _getStarTotalData = () => {
     const { data, ready } = this.props
@@ -57,10 +63,10 @@ class Star extends React.Component {
                     <Statistic title="Total Stars" value={totalStar} prefix={<Icon type="star" />} />
                   </Card></Col>
                   <Col span={8}><Card bordered={false}>
-                    <Statistic title="Avg. star/day" value={averageStarPerDay} precision={2} />
+                    <Statistic title="Avg. stars/day" value={averageStarPerDay} precision={2} />
                   </Card></Col>
                   <Col span={8}><Card bordered={false}>
-                    <Statistic title="Max increment a day" value={maxIncrement} />
+                    <Statistic title="Max. stars/day" value={maxIncrement} />
                   </Card></Col>
                 </Row>
               )
@@ -79,23 +85,15 @@ class Star extends React.Component {
     if (!Array.from(ready.values()).includes(true)) return
 
     const seriesStarTotal = this._getStarTotalData()
+    const seriesStarIncrement = this._getStarIncrementData()
     return (
       <div>
         <Row>
-        Total Stars
-        </Row>
-        <Row>
           <Card bordered={false} bodyStyle={CENTER_FLEX}>
             <ResponsiveContainer width="80%" height={300}>
-              <AreaChart>
-                <defs>
-                  <linearGradient id="starGradientArea" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#ffb900" stopOpacity={0.8}/>
-                    <stop offset="95%" stopColor="#ffb900" stopOpacity={0}/>
-                  </linearGradient>
-                </defs>
+              <LineChart>
                 <CartesianGrid stroke="#ccc" strokeDasharray="2 7" />
-                <Brush data={seriesStarTotal} dataKey="date"/>
+                <Legend verticalAlign="top"/>
                 <XAxis
                   dataKey="date"
                   scale="time"
@@ -104,48 +102,52 @@ class Star extends React.Component {
                   domain = {['auto', 'auto']}
                   tickFormatter={ms => new Date(ms).toISOString().slice(0,10)}
                 />
-                <YAxis dataKey="value"/>
+                <YAxis dataKey="value" label={{ value: 'total stars', angle: -90, position: 'insideBottomLeft' }}/>
                 <ChartToolTip labelFormatter={ms => new Date(ms).toISOString().slice(0,10)}/>
-                {seriesStarTotal.map(serie => (
-                  <Area
+                {seriesStarTotal.map((serie, index) => (
+                  <Line
                     type="monotone"
-                    key={"star-chart-area" + serie.name}
+                    key={`star-chart-total-${serie.name}`}
                     data={serie.data}
                     dataKey="value"
                     name={serie.name}
-                    stroke="#ffb900"
-                    fill={"url(#starGradientArea)"}
+                    stroke={COLORS[index]}
                     dot={false}
                   />
                 ))}
-              </AreaChart>
+              </LineChart>
+            </ResponsiveContainer>
+          </Card>
+          <Card bordered={false} bodyStyle={CENTER_FLEX}>
+            <ResponsiveContainer width="80%" height={300}>
+              <LineChart>
+                <CartesianGrid stroke="#ccc" strokeDasharray="2 7" />
+                <Legend verticalAlign="top"/>
+                <XAxis
+                  dataKey="date"
+                  scale="time"
+                  allowDuplicatedCategory={false}
+                  type="number"
+                  domain = {['auto', 'auto']}
+                  tickFormatter={ms => new Date(ms).toISOString().slice(0,10)}
+                />
+                <YAxis dataKey="value" label={{ value: 'daily increment', angle: -90, position: 'insideBottomLeft' }}/>
+                <ChartToolTip labelFormatter={ms => new Date(ms).toISOString().slice(0,10)}/>
+                {seriesStarIncrement.map((serie, index) => (
+                  <Line
+                    type="monotone"
+                    key={`star-chart-increment-${serie.name}`}
+                    data={serie.data}
+                    dataKey="value"
+                    name={serie.name}
+                    stroke={COLORS[index]}
+                    dot={false}
+                  />
+                ))}
+              </LineChart>
             </ResponsiveContainer>
           </Card>
         </Row>
-        {/* <Row>
-        Daily increment
-      </Row>
-      <Row>
-        <Card bordered={false} bodyStyle={CENTER_FLEX}>
-          <ResponsiveContainer width="80%" height={300}>
-            <LineChart data={this._getStarIncrementData()}>
-              <Line type="monotone" dataKey="stars" stroke="#ffb900" dot={false}/>
-              <CartesianGrid stroke="#ccc" strokeDasharray="3 7" />
-              <XAxis
-                dataKey="date"
-                domain = {['auto', 'auto']}
-                type="number"
-                tickFormatter={ms => new Date(ms).toISOString().slice(0,10)}
-              />
-              <YAxis />
-              <ChartToolTip
-                // formatter={(value, name) => [value, new Date(name).toISOString().slice(0,10)]}
-                labelFormatter={ms => new Date(ms).toISOString().slice(0,10)}
-              />
-            </LineChart>
-          </ResponsiveContainer>
-        </Card>
-      </Row> */}
       </div>
     )
   }

@@ -180,13 +180,12 @@ class GithubFetcher {
     // Statistics variables
     totalToFetch = preparationData.repository.stargazers.totalCount
     const createdAt = preparationData.repository.createdAt
-
+    let maxIncrement = 0
 
     // data traversal, 100 edges/request
     do {
       if (shouldAbort) {
         if (shouldAbort()) {
-          console.log(shouldAbort())
           return
         }
       }
@@ -209,6 +208,7 @@ class GithubFetcher {
         } else {
           formattedData.set(date, formattedData.get(date) + 1)
         }
+        if (formattedData.get(date) > maxIncrement) maxIncrement = formattedData.get(date)
         // update progress tracking
         addNumberFetched()
       })
@@ -236,6 +236,7 @@ class GithubFetcher {
     if (onFinish) {
       onFinish({
         totalStar: totalToFetch,
+        maxIncrement,
         createdAt,
       })
     }
@@ -301,7 +302,7 @@ class GithubFetcher {
     // Statistics variables
     totalToFetch = preparationData.repository.forks.totalCount
     const createdAt = preparationData.repository.createdAt
-
+    let maxIncrement = 0
 
     // data traversal, 100 edges/request
     do {
@@ -328,6 +329,7 @@ class GithubFetcher {
         } else {
           formattedData.set(date, formattedData.get(date) + 1)
         }
+        if (formattedData.get(date) > maxIncrement) maxIncrement = formattedData.get(date)
         // update progress tracking
         addNumberFetched()
       })
@@ -355,6 +357,7 @@ class GithubFetcher {
     if (onFinish) {
       onFinish({
         totalFork: totalToFetch,
+        maxIncrement,
         createdAt,
       })
     }

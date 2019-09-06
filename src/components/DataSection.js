@@ -196,7 +196,7 @@ class DataSection extends React.Component {
 
   _renderBody = () => {
     const { data, stats, ready } = this.state
-    const { type, repos } = this.props
+    const { type, repos} = this.props
 
     let body = <div />
 
@@ -212,8 +212,10 @@ class DataSection extends React.Component {
   }
 
   render() {
+    const { id } = this.props
+
     return (
-      <div id="github-star-section">
+      <div id={id}>
         <Row type="flex" align="middle">
           <Col span={8}>
             <div className="data-card">
@@ -244,6 +246,7 @@ class DataSection extends React.Component {
 }
 
 DataSection.propTypes = {
+  id: PropTypes.string,
   githubApiToken: PropTypes.string,
   repos: PropTypes.array,
   deleteRepo: PropTypes.string,
