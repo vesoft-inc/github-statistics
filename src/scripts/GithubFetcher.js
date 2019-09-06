@@ -1,7 +1,7 @@
 import {  } from 'graphql'
 import { GraphQLClient } from 'graphql-request'
 
-const getProgress = (c, t) => Math.floor(c / t * 100)
+const getProgress = (c, t) => t === 0 ? 100 : Math.floor(c / t * 100)
 
 class GithubFetcher {
 
@@ -18,26 +18,57 @@ class GithubFetcher {
     )
 
     // configurations
+    this.liveUpdate = false
     this.pagesPerUpdate = 20
   }
 
   /**
-   * reset class fields to default
+   * test if the repository exists
+   * @param owner owner of the repository
+   * @param name of the repository
+   * @param onResult (@param result) function that will be called when test finishes
+   * @return false if not exist, true otherwise
    */
-  reset = () => {
-    this.fetching = false  }
+  testRepository = async (owner, name, onResult) => {
+    const variables = {
+      owner: owner,
+      name: name,
+    }
+
+    const query = /* GraphQL */ `
+      query getRepository($owner: String!, $name: String!){
+        repository(owner: $owner, name: $name) {
+          id
+        }
+      }
+    `
+
+    try {
+      await this.gqlClient.request(query, variables)
+    } catch (error) {
+      if (onResult) {
+        onResult(false)
+      }
+      return false
+    }
+
+    if (onResult) {
+      onResult(true)
+    }
+    return true
+  }
 
   /**
    * fetch repository low-level data
-   * @param onUpdate (@param data) function that will be called when a new data update is avaiable
-   * @param onFinish function that will be called when fetching is finished
-   * @param onProgress function that will be called when progress is updated
+   * @param owner owner of the repository
+   * @param name name of the repository
+   * @param onUpdate (data) function that will be called when a new data update is avaiable
+   * @param onFinish (stats) function that will be called when fetching is finished
+   * @param onProgress (progress) function that will be called when progress is updated
+   * @param shouldAbort function that returns a boolean which determines whether fetching should abort
    * @returns Object that contains statistics
    */
-  fetchRepositoryData = async (onUpdate, onFinish, onProgress) => {
-    const owner = 'vesoft-inc'
-    const name = 'nebula'
-
+  fetchRepositoryData = async (owner, name, onUpdate, onFinish, onProgress, shouldAbort) => {
     const variables = {
       owner: owner,
       name: name,
@@ -62,10 +93,16 @@ class GithubFetcher {
 
     // update progress tracking
     if (onProgress) {
-      onProgress(77)
+      onProgress(10)
     }
 
     const data = await this.gqlClient.request(query, variables)
+    // if (shouldAbort) {
+    //   if (shouldAbort()) {
+    //     return
+    //   }
+    // }
+
     const formattedData = {
       name: data.repository.nameWithOwner,
       createdAt: data.repository.createdAt,
@@ -87,18 +124,16 @@ class GithubFetcher {
   }
 
   /**
-   * fetch stargazers data
-   * @param onUpdate function that will be called when a new data update is avaiable
-   * @param onFinish function that will be called when fetching is finished
-   * @param onProgress function that will be called when progress is updated
+   * fetch repository low-level data
+   * @param owner owner of the repository
+   * @param name name of the repository
+   * @param onUpdate (data) function that will be called when a new data update is avaiable
+   * @param onFinish (stats) function that will be called when fetching is finished
+   * @param onProgress (progress) function that will be called when progress is updated
+   * @param shouldAbort function that returns a boolean which determines whether fetching should abort
    * @returns Object that contains statistics
    */
-  fetchStargazerData = async (onUpdate, onFinish, onProgress) => {
-    // const owner = 'facebook'
-    // const name = 'react'
-    const owner = 'vesoft-inc'
-    const name = 'nebula'
-
+  fetchStargazerData = async (owner, name, onUpdate, onFinish, onProgress, shouldAbort) => {
     const preparationVariables = {
       owner: owner,
       name: name,
@@ -145,10 +180,16 @@ class GithubFetcher {
     // Statistics variables
     totalToFetch = preparationData.repository.stargazers.totalCount
     const createdAt = preparationData.repository.createdAt
-
+    let maxIncrement = 0
 
     // data traversal, 100 edges/request
     do {
+      if (shouldAbort) {
+        if (shouldAbort()) {
+          return
+        }
+      }
+
       const variables = {
         owner: owner,
         name: name,
@@ -167,6 +208,7 @@ class GithubFetcher {
         } else {
           formattedData.set(date, formattedData.get(date) + 1)
         }
+        if (formattedData.get(date) > maxIncrement) maxIncrement = formattedData.get(date)
         // update progress tracking
         addNumberFetched()
       })
@@ -183,7 +225,7 @@ class GithubFetcher {
       pageIndex += 1
 
       // onUpdate callback if existed
-      if (onUpdate && pageIndex % this.pagesPerUpdate === 0) {
+      if (this.liveUpdate && onUpdate && pageIndex % this.pagesPerUpdate === 0) {
         onUpdate(formattedData)
       }
     } while (previousEndCursor !== null)
@@ -194,28 +236,25 @@ class GithubFetcher {
     if (onFinish) {
       onFinish({
         totalStar: totalToFetch,
+        maxIncrement,
         createdAt,
       })
     }
-
-    this.reset()
 
     return formattedData
   }
 
   /**
    * fetch fork data
-   * @param onUpdate (@param data) function that will be called when a new data update is avaiable
-   * @param onFinish function that will be called when fetching is finished
-   * @param onProgress function that will be called when progress is updated
+   * @param owner owner of the repository
+   * @param name name of the repository
+   * @param onUpdate (data) function that will be called when a new data update is avaiable
+   * @param onFinish (stats) function that will be called when fetching is finished
+   * @param onProgress (progress) function that will be called when progress is updated
+   * @param shouldAbort function that returns a boolean which determines whether fetching should abort
    * @returns Object that contains statistics
    */
-  fetchForkData = async (onUpdate, onFinish, onProgress) => {
-    // const owner = 'graphql-go'
-    // const name = 'graphql'
-    const owner = 'vesoft-inc'
-    const name = 'nebula'
-
+  fetchForkData = async (owner, name, onUpdate, onFinish, onProgress, shouldAbort) => {
     const preparationVariables = {
       owner: owner,
       name: name,
@@ -263,10 +302,15 @@ class GithubFetcher {
     // Statistics variables
     totalToFetch = preparationData.repository.forks.totalCount
     const createdAt = preparationData.repository.createdAt
-
+    let maxIncrement = 0
 
     // data traversal, 100 edges/request
     do {
+      if (shouldAbort) {
+        if (shouldAbort()) {
+          return
+        }
+      }
       const variables = {
         owner: owner,
         name: name,
@@ -285,6 +329,7 @@ class GithubFetcher {
         } else {
           formattedData.set(date, formattedData.get(date) + 1)
         }
+        if (formattedData.get(date) > maxIncrement) maxIncrement = formattedData.get(date)
         // update progress tracking
         addNumberFetched()
       })
@@ -301,7 +346,7 @@ class GithubFetcher {
       pageIndex += 1
 
       // onUpdate callback if existed
-      if (onUpdate && pageIndex % this.pagesPerUpdate === 0) {
+      if (this.liveUpdate && onUpdate && pageIndex % this.pagesPerUpdate === 0) {
         onUpdate(formattedData)
       }
     } while (previousEndCursor !== null)
@@ -312,28 +357,25 @@ class GithubFetcher {
     if (onFinish) {
       onFinish({
         totalFork: totalToFetch,
+        maxIncrement,
         createdAt,
       })
     }
-
-    this.reset()
 
     return formattedData
   }
 
   /**
    * fetch release data
-   * @param onUpdate (@param data) function that will be called when a new data update is avaiable
-   * @param onFinish function that will be called when fetching is finished
-   * @param onProgress function that will be called when progress is updated
+   * @param owner owner of the repository
+   * @param name name of the repository
+   * @param onUpdate (data) function that will be called when a new data update is avaiable
+   * @param onFinish (stats) function that will be called when fetching is finished
+   * @param onProgress (progress) function that will be called when progress is updated
+   * @param shouldAbort function that returns a boolean which determines whether fetching should abort
    * @returns Object that contains statistics
    */
-  fetchReleaseData = async (onUpdate, onFinish, onProgress) => {
-    // const owner = 'graphql-go'
-    // const name = 'graphql'
-    const owner = 'vesoft-inc'
-    const name = 'nebula'
-
+  fetchReleaseData = async (owner, name, onUpdate, onFinish, onProgress, shouldAbort) => {
     const variables = {
       owner: owner,
       name: name,
@@ -375,6 +417,11 @@ class GithubFetcher {
 
     // Preparation query
     const data = await this.gqlClient.request(query, variables)
+    // if (shouldAbort) {
+    //   if (shouldAbort()) {
+    //     return
+    //   }
+    // }
 
     // Statistics variables
     totalToFetch = data.repository.releases.nodes[0].releaseAssets.totalCount
@@ -400,7 +447,6 @@ class GithubFetcher {
     })
 
     if (onUpdate) {
-      console.log(formattedData)
       onUpdate(formattedData)
     }
 
@@ -413,8 +459,6 @@ class GithubFetcher {
         createdAt: data.repository.releases.nodes[0].createdAt
       })
     }
-
-    this.reset()
 
     return formattedData
   }

@@ -5,6 +5,14 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  overflow: scroll;
+  white-space: nowrap;
+  background-color: #fff;
+
+}
+
+header {
+  display: block;
 }
 
 code {

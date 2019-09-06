@@ -1,38 +1,76 @@
 @import '~antd/dist/antd.css';
 
-.App {
-  text-align: center;
+.header {
+  position: relative;
+  width: 100%;
+  background-color: #FFFFFF;
+  z-index: 10;
+  padding: 12px 5%; 
+  box-shadow: 0 2px 8px #f0f1f2;
 }
 
-
-.App-header {
-  /* background-color: #f8f8f8; */
-  min-height: 10vh;
+.container {
   display: flex;
   flex-direction: row;
-  align-items: center;
-  justify-content: center;
-  padding-left: 24px;
-  padding-right: 24px;
-  padding-top: 12px;
-  padding-bottom: 12px;
-  font-size: calc(10px + 2vmin);
-  color: white;
+  margin: 0 5%; 
 }
 
-.section-div {
-  width: 90%;
-  margin: auto;
-  /* display: block; */
+.sider {
+}
+
+.content {
+  text-align: center;
+  width: 100%;
+}
+
+/* Global reusable */
+.flex-center {
+  display: flex;
+  place-content: center;
+  align-items: center;
+}
+
+.flex-center-left {
+  display: flex;
+  justify-content: flex-start;
+  align-content: center;
+  align-items: center;
+}
+
+
+/* Specific on top-level */
+.header-title {
+  color: rgba(0, 0, 0, 0.85);
+  font-weight: 800;
+  font-size: 24px;
+}
+
+.header-section {
+  margin: auto 24px;
+  padding: 2px 0px;
+}
+
+.header-input {
+  margin-right: 12px;
+  width: auto;
 }
 
 .section-title {
   color: rgba(0, 0, 0, 0.85);
   font-weight: 600;
-  font-size: 38px;
+  font-size: 36px;
 }
 
 /* OVERLOADS */
+a:hover {
+  color:rgba(0, 0, 0, 1);
+}
+
+.ant-anchor {
+  font-size: 15px;
+  padding: 20px 20px;
+}
+
 .ant-anchor-ink::before {
   position: relative;
   display: block;
@@ -40,23 +78,15 @@
   height: 100%;
   margin: 0 auto;
   background-color: #e8e8e8;
-  content: ' ';
+  content: '';
 }
 
 .ant-anchor-ink-ball {
-  position: absolute;
-  left: 50%;
-  display: none;
   width: 1px;
   height: 8px;
   background-color: #fff;
   border: 1px solid #222;
   border-radius: 8px;
-  -webkit-transform: translateX(-50%);
-  -ms-transform: translateX(-50%);
-  transform: translateX(-50%);
-  -webkit-transition: top 0.3s ease-in-out;
-  transition: top 0.3s ease-in-out;
 }
 
 .ant-anchor-link-title.ant-anchor-link-title-active {
