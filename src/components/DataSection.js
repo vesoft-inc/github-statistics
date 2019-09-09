@@ -10,6 +10,7 @@ import { Card, Progress, Button, Row, Col, Icon, Tag } from 'antd'
 import GithubFetcher from '../scripts/GithubFetcher'
 
 import Star from './sections/Star'
+import Repository from './sections/Repository'
 
 class DataSection extends React.Component {
   constructor(props) {
@@ -24,9 +25,27 @@ class DataSection extends React.Component {
       loading: false,
     }
 
-    const { githubApiToken } = this.props
+    const { githubApiToken, type } = this.props
+
     this.fetcher = new GithubFetcher(githubApiToken)
+
+    switch (type) {
+      case TYPES.REPO:
+        this.icon = <Icon type="book" style={{ fontSize: '24px', color: '#000000' }} />
+        this.body = Repository
+        this.fetchCall = this.fetcher.fetchRepositoryData
+        break
+      case TYPES.STAR:
+        this.icon = <Icon type="star" style={{ fontSize: '24px', color: '#ffb900' }} />
+        this.body = Star
+        this.fetchCall = this.fetcher.fetchStargazerData
+        break
+      default:
+        console.log('TYPE DOESNOT EXIST')
+        return 'ERROR'
+    }
   }
+
 
   componentDidUpdate(prevProps) {
     const { deleteRepo, repos } = this.props
@@ -66,7 +85,7 @@ class DataSection extends React.Component {
    * @returns exit status string
    */
   _fetch = repo => {
-    const { type, repos } = this.props
+    const { repos } = this.props
     const slashIndex = repo.indexOf('/')
     const owner = repo.slice(0, slashIndex)
     const name = repo.slice(slashIndex + 1)
@@ -102,20 +121,14 @@ class DataSection extends React.Component {
       return !repos.includes(repo)
     }
 
-    switch (type) {
-      case TYPES.STAR:
-        this.fetcher.fetchStargazerData(
-          owner, name,
-          onUpdate,
-          onFinish,
-          onProgress,
-          shouldAbort,
-        )
-        break
-      default:
-        console.log('TYPE DOESNOT EXIST')
-        return 'ERROR'
-    }
+    this.fetchCall(
+      owner, name,
+      onUpdate,
+      onFinish,
+      onProgress,
+      shouldAbort,
+    )
+
     return 'FETCH REQUESTED'
   }
 
@@ -188,31 +201,21 @@ class DataSection extends React.Component {
 
   _renderBody = () => {
     const { data, stats, ready } = this.state
-    const { type, repos} = this.props
+    const { repos } = this.props
 
-    let body = <div />
-
-    switch (type) {
-      case TYPES.STAR:
-        body = <Star repos={repos} data={data} stats={stats} ready={ready}/>
-        break
-      default:
-        console.log('TYPE DOESNOT EXIST')
-    }
-
-    return body
+    return <this.body repos={repos} data={data} stats={stats} ready={ready}/>
   }
 
   render() {
-    const { id } = this.props
+    const { type } = this.props
 
     return (
-      <div id={id}>
-        <Row type="flex" align="middle">
+      <div id={type}>
+        <Row type="flex" align="middle" className="section-header">
           <div className="data-card">
-            <Icon type="star" style={{ fontSize: '32px', color: '#ffb900' }} />
+            {this.icon}
             <div className="section-title">
-              Star
+              {type}
             </div>
           </div>
           <div className="data-card">
@@ -221,13 +224,13 @@ class DataSection extends React.Component {
           <div className="data-card">
             {this._renderRepoTags()}
           </div>
-          <Progress
-            strokeWidth={1}
-            width={32}
-            percent={this._getAllProgress()}
-            showInfo={false}
-          />
         </Row>
+        <Progress
+          strokeWidth={1}
+          width={32}
+          percent={this._getAllProgress()}
+          showInfo={false}
+        />
         {this._renderBody()}
       </div>
     )
@@ -236,7 +239,6 @@ class DataSection extends React.Component {
 }
 
 DataSection.propTypes = {
-  id: PropTypes.string,
   githubApiToken: PropTypes.string,
   repos: PropTypes.array,
   deleteRepo: PropTypes.string,

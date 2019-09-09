@@ -1,12 +1,11 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 
-import { Card, Row, Col, Statistic, Icon, Descriptions, Anchor, Button, Input, Tag, Tooltip, message } from 'antd'
-import { LineChart, Label, AreaChart, Line, Area, CartesianGrid, XAxis, YAxis, ResponsiveContainer, Legend, Tooltip as ChartToolTip } from 'recharts'
+import { Row, Statistic, Icon, Tag } from 'antd'
+import { LineChart, Line, CartesianGrid, XAxis, YAxis, ResponsiveContainer, Legend, Tooltip as ChartToolTip } from 'recharts'
 
 import COLORS from './Colors'
 
-const CENTER_FLEX = { display: 'flex', placeContent: 'center' }
 
 class Star extends React.Component {
 
@@ -24,6 +23,7 @@ class Star extends React.Component {
       })
       series.push({ name: repo, data })
     })
+    console.log('this bitch is called once')
     return series
   }
 
@@ -50,19 +50,20 @@ class Star extends React.Component {
     const { stats, ready } = this.props
 
     return (
-      <div>
-        {Array.from(stats.entries()).map((
-          (pair, index) => {
-            if (ready.get(pair[0])) {
-              const { totalStar, maxIncrement, createdAt } = pair[1]
-              const dateSinceCreated = Math.floor((Date.now() - new Date(createdAt).valueOf()) / (24*60*60*1000))
-              const averageStarPerDay = totalStar / dateSinceCreated
-              return (
-                <Row key={`star-statistics-${pair[0]}`}>
+      <>
+      {Array.from(stats.entries()).map((
+        (pair, index) => {
+          if (ready.get(pair[0])) {
+            const { totalStar, maxIncrement, createdAt } = pair[1]
+            const dateSinceCreated = Math.floor((Date.now() - new Date(createdAt).valueOf()) / (24*60*60*1000))
+            const averageStarPerDay = totalStar / dateSinceCreated
+            return (
+              <div key={`star-statistics-${pair[0]}`}>
+                <Row>
+                  <Tag color={COLORS[index]}>
+                    {pair[0]}
+                  </Tag>
                   <Row>
-                    <Tag color={COLORS[index]}>
-                      {pair[0]}
-                    </Tag>
                   </Row>
                   <span className="stats-card">
                     <Statistic title="Total stars" value={totalStar} prefix={<Icon type="star" />} />
@@ -74,13 +75,13 @@ class Star extends React.Component {
                     <Statistic title="Max. stars/day" value={maxIncrement} />
                   </span>
                 </Row>
-              )
-            }
-            return
+              </div>
+            )
           }
-        ))}
-
-      </div>
+          return
+        }
+      ))}
+      </>
     )
   }
 
@@ -92,77 +93,77 @@ class Star extends React.Component {
     const seriesStarTotal = this._getStarTotalData()
     const seriesStarIncrement = this._getStarIncrementData()
     return (
-      <div>
-        <Row>
-          <div>
-            <ResponsiveContainer width="100%" height={300}>
-              <LineChart>
-                <CartesianGrid stroke="#ccc" strokeDasharray="2 7" />
-                <Legend verticalAlign="top"/>
-                <XAxis
-                  dataKey="date"
-                  scale="time"
-                  allowDuplicatedCategory={false}
-                  type="number"
-                  domain = {['auto', 'auto']}
-                  tickFormatter={ms => new Date(ms).toISOString().slice(0,10)}
+      <>
+      <Row>
+        <div>
+          <ResponsiveContainer width="100%" height={300}>
+            <LineChart>
+              <CartesianGrid stroke="#ccc" strokeDasharray="2 7" />
+              <Legend verticalAlign="top"/>
+              <XAxis
+                dataKey="date"
+                scale="time"
+                allowDuplicatedCategory={false}
+                type="number"
+                domain = {['auto', 'auto']}
+                tickFormatter={ms => new Date(ms).toISOString().slice(0,10)}
+              />
+              <YAxis dataKey="value" label={{ value: 'total stars', angle: -90, position: 'insideBottomLeft' }}/>
+              <ChartToolTip labelFormatter={ms => new Date(ms).toISOString().slice(0,10)}/>
+              {seriesStarTotal.map((serie, index) => (
+                <Line
+                  type="monotone"
+                  key={`star-chart-total-${serie.name}`}
+                  data={serie.data}
+                  dataKey="value"
+                  name={serie.name}
+                  stroke={COLORS[index]}
+                  dot={false}
                 />
-                <YAxis dataKey="value" label={{ value: 'total stars', angle: -90, position: 'insideBottomLeft' }}/>
-                <ChartToolTip labelFormatter={ms => new Date(ms).toISOString().slice(0,10)}/>
-                {seriesStarTotal.map((serie, index) => (
-                  <Line
-                    type="monotone"
-                    key={`star-chart-total-${serie.name}`}
-                    data={serie.data}
-                    dataKey="value"
-                    name={serie.name}
-                    stroke={COLORS[index]}
-                    dot={false}
-                  />
-                ))}
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
-          <div>
-            <ResponsiveContainer width="100%" height={300}>
-              <LineChart>
-                <CartesianGrid stroke="#ccc" strokeDasharray="2 7" />
-                <Legend verticalAlign="top"/>
-                <XAxis
-                  dataKey="date"
-                  scale="time"
-                  allowDuplicatedCategory={false}
-                  type="number"
-                  domain = {['auto', 'auto']}
-                  tickFormatter={ms => new Date(ms).toISOString().slice(0,10)}
+              ))}
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+        <div>
+          <ResponsiveContainer width="100%" height={300}>
+            <LineChart>
+              <CartesianGrid stroke="#ccc" strokeDasharray="2 7" />
+              <Legend verticalAlign="top"/>
+              <XAxis
+                dataKey="date"
+                scale="time"
+                allowDuplicatedCategory={false}
+                type="number"
+                domain = {['auto', 'auto']}
+                tickFormatter={ms => new Date(ms).toISOString().slice(0,10)}
+              />
+              <YAxis dataKey="value" label={{ value: 'daily increment', angle: -90, position: 'insideBottomLeft' }}/>
+              <ChartToolTip labelFormatter={ms => new Date(ms).toISOString().slice(0,10)}/>
+              {seriesStarIncrement.map((serie, index) => (
+                <Line
+                  type="monotone"
+                  key={`star-chart-increment-${serie.name}`}
+                  data={serie.data}
+                  dataKey="value"
+                  name={serie.name}
+                  stroke={COLORS[index]}
+                  dot={false}
                 />
-                <YAxis dataKey="value" label={{ value: 'daily increment', angle: -90, position: 'insideBottomLeft' }}/>
-                <ChartToolTip labelFormatter={ms => new Date(ms).toISOString().slice(0,10)}/>
-                {seriesStarIncrement.map((serie, index) => (
-                  <Line
-                    type="monotone"
-                    key={`star-chart-increment-${serie.name}`}
-                    data={serie.data}
-                    dataKey="value"
-                    name={serie.name}
-                    stroke={COLORS[index]}
-                    dot={false}
-                  />
-                ))}
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
-        </Row>
-      </div>
+              ))}
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+      </Row>
+      </>
     )
   }
 
   render() {
     return (
-      <div>
-        {this._renderStatistics()}
-        {this._renderCharts()}
-      </div>
+      <>
+      {this._renderStatistics()}
+      {this._renderCharts()}
+      </>
     )
   }
 }
