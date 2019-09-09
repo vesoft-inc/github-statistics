@@ -1,6 +1,20 @@
 
+.section-title {
+  display: inline;
+  margin: 0 12px;
+  color: rgba(0, 0, 0, 0.85);
+  font-weight: 600;
+  font-size: 32px;
+}
+
 .data-card {
-  padding: 24px;
+  padding: 16px;
+}
+
+.stats-card {
+  display: inline-block;
+  margin: 0 12px 0 0;
+  padding: 6px 12px 12px 12px;
 }
 
 .ant-tag.repo-tag {

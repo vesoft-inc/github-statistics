@@ -134,34 +134,26 @@ class DataSection extends React.Component {
     const { repos } = this.props
 
     return (
-      <div style={{ display: 'inline-block'}}>
-        <Button
-          icon="cloud-download"
-          disabled={repos.length === 0}
-          onClick={() => {
-            this.setState({ loading: true })
-            if (this._getAllProgress() === 100) { // re-fetch all
-              repos.forEach(repo => this._fetch(repo))
-            }
-            else { // on fetch unfetched
-              repos.forEach(repo => {
-                if (!ready.get(repo)) {
-                  this._fetch(repo)
-                }
-              })
-            }
-          }}
-          loading={loading}
-        >
-          Update
-        </Button>
-        <Progress
-          style={{ lineHeight: 0.7, display: 'block'}}
-          percent={this._getAllProgress()}
-          showInfo={false}
-          strokeWidth={5}
-        />
-      </div>
+      <Button
+        icon="cloud-download"
+        disabled={repos.length === 0}
+        onClick={() => {
+          this.setState({ loading: true })
+          if (this._getAllProgress() === 100) { // re-fetch all
+            repos.forEach(repo => this._fetch(repo))
+          }
+          else { // on fetch unfetched
+            repos.forEach(repo => {
+              if (!ready.get(repo)) {
+                this._fetch(repo)
+              }
+            })
+          }
+        }}
+        loading={loading}
+      >
+        Update
+      </Button>
     )
   }
 
@@ -176,8 +168,8 @@ class DataSection extends React.Component {
             type="circle"
             percent={progress.get(repo)}
             showInfo={false}
-            strokeWidth={20}
-            width={20}
+            strokeWidth={8}
+            width={16}
           />
           <Tag
             className="repo-tag"
@@ -217,26 +209,24 @@ class DataSection extends React.Component {
     return (
       <div id={id}>
         <Row type="flex" align="middle">
-          <Col span={8}>
-            <div className="data-card">
-              <Icon type="star" style={{ fontSize: '32px', color: '#ffb900' }} />
+          <div className="data-card">
+            <Icon type="star" style={{ fontSize: '32px', color: '#ffb900' }} />
+            <div className="section-title">
+              Star
             </div>
-          </Col>
-          <Col span={8}>
-            <div className="data-card">
-              <div className="section-title">
-                Star
-              </div>
-            </div>
-          </Col>
-          <Col span={8}>
-            <div className="data-card">
-              {this._renderUpdateAllButton()}
-            </div>
-          </Col>
-        </Row>
-        <Row>
-          {this._renderRepoTags()}
+          </div>
+          <div className="data-card">
+            {this._renderUpdateAllButton()}
+          </div>
+          <div className="data-card">
+            {this._renderRepoTags()}
+          </div>
+          <Progress
+            strokeWidth={1}
+            width={32}
+            percent={this._getAllProgress()}
+            showInfo={false}
+          />
         </Row>
         {this._renderBody()}
       </div>
