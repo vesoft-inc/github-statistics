@@ -1,14 +1,17 @@
+.section-header {
+  padding: 12px 0 0 0;
+}
 
 .section-title {
   display: inline;
-  margin: 0 12px;
+  margin: 0 16px;
   color: rgba(0, 0, 0, 0.85);
   font-weight: 600;
-  font-size: 32px;
+  font-size: 24px;
 }
 
 .data-card {
-  padding: 16px;
+  padding: 12px 24px;
 }
 
 .stats-card {

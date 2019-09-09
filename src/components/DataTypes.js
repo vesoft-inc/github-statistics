@@ -1,6 +1,11 @@
+/**
+ * Keys are used for reference
+ * Values are used for displaying and passing
+ */
+
 export default {
-  REPO: 'REPO',
-  STAR: 'STAR',
-  FORK: 'FORK',
-  RELEASE: 'RELEASE',
+  REPO: 'Repository',
+  STAR: 'Star',
+  FORK: 'Fork',
+  RELEASE: 'Release',
 }

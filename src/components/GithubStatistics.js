@@ -421,9 +421,9 @@ class GithubStatistics extends React.Component {
           <div className="header">
             <Row type="flex" align="middle">
               <Col className="header-section">
-                <span className="header-title">
+                <a className="header-title" href="/">
                   Github Stats
-                </span>
+                </a>
               </Col>
               <Col className="header-section flex-center">
                 {this._renderHeaderInput()}
@@ -437,16 +437,20 @@ class GithubStatistics extends React.Component {
         <div className="container">
           <div className="sider">
             <Anchor bounds={0} className="anchor">
-              <Anchor.Link title="Repository" href="#Repository" />
-              <Anchor.Link title="Star" href="#Star" />
-              <Anchor.Link title="Fork" href="#Fork" />
-              <Anchor.Link title="Release" href="#Release" />
+              {Object.values(TYPES).map(value => (
+                <Anchor.Link key={`anchor-link-${value}`} title={value} href={`#${value}`}/>
+              ))}
             </Anchor>
           </div>
 
           <div className="content" >
             <DataSection
-              id="Star"
+              type={TYPES.REPO}
+              repos={repos}
+              deleteRepo={deleteRepo}
+            />
+
+            <DataSection
               type={TYPES.STAR}
               repos={repos}
               deleteRepo={deleteRepo}
