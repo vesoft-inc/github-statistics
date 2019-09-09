@@ -52,22 +52,27 @@ class Star extends React.Component {
     return (
       <div>
         {Array.from(stats.entries()).map((
-          pair => {
+          (pair, index) => {
             if (ready.get(pair[0])) {
               const { totalStar, maxIncrement, createdAt } = pair[1]
               const dateSinceCreated = Math.floor((Date.now() - new Date(createdAt).valueOf()) / (24*60*60*1000))
               const averageStarPerDay = totalStar / dateSinceCreated
               return (
-                <Row key={"star-statistics" + pair[0]}>
-                  <Col span={8}><Card bordered={false}>
-                    <Statistic title="Total Stars" value={totalStar} prefix={<Icon type="star" />} />
-                  </Card></Col>
-                  <Col span={8}><Card bordered={false}>
+                <Row key={`star-statistics-${pair[0]}`}>
+                  <Row>
+                    <Tag color={COLORS[index]}>
+                      {pair[0]}
+                    </Tag>
+                  </Row>
+                  <span className="stats-card">
+                    <Statistic title="Total stars" value={totalStar} prefix={<Icon type="star" />} />
+                  </span>
+                  <span className="stats-card">
                     <Statistic title="Avg. stars/day" value={averageStarPerDay} precision={2} />
-                  </Card></Col>
-                  <Col span={8}><Card bordered={false}>
+                  </span>
+                  <span className="stats-card">
                     <Statistic title="Max. stars/day" value={maxIncrement} />
-                  </Card></Col>
+                  </span>
                 </Row>
               )
             }
@@ -89,8 +94,8 @@ class Star extends React.Component {
     return (
       <div>
         <Row>
-          <Card bordered={false} bodyStyle={CENTER_FLEX}>
-            <ResponsiveContainer width="80%" height={300}>
+          <div>
+            <ResponsiveContainer width="100%" height={300}>
               <LineChart>
                 <CartesianGrid stroke="#ccc" strokeDasharray="2 7" />
                 <Legend verticalAlign="top"/>
@@ -117,9 +122,9 @@ class Star extends React.Component {
                 ))}
               </LineChart>
             </ResponsiveContainer>
-          </Card>
-          <Card bordered={false} bodyStyle={CENTER_FLEX}>
-            <ResponsiveContainer width="80%" height={300}>
+          </div>
+          <div>
+            <ResponsiveContainer width="100%" height={300}>
               <LineChart>
                 <CartesianGrid stroke="#ccc" strokeDasharray="2 7" />
                 <Legend verticalAlign="top"/>
@@ -146,7 +151,7 @@ class Star extends React.Component {
                 ))}
               </LineChart>
             </ResponsiveContainer>
-          </Card>
+          </div>
         </Row>
       </div>
     )
