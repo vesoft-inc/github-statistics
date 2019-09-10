@@ -182,6 +182,18 @@ class GithubFetcher {
     const createdAt = preparationData.repository.createdAt
     let maxIncrement = 0
 
+    const handleEdge = edge => {
+      const date = new Date(edge.starredAt.slice(0,10)).getTime() // ISO-8601 encoded UTC date string
+      if (!formattedData.has(date)) {
+        formattedData.set(date, 1)
+      } else {
+        formattedData.set(date, formattedData.get(date) + 1)
+      }
+      if (formattedData.get(date) > maxIncrement) maxIncrement = formattedData.get(date)
+      // update progress tracking
+      addNumberFetched()
+    }
+
     // data traversal, 100 edges/request
     do {
       if (shouldAbort) {
@@ -201,17 +213,7 @@ class GithubFetcher {
       // update variables
 
       // destructure data from the JSON
-      data.repository.stargazers.edges.forEach(edge => {
-        const date = new Date(edge.starredAt.slice(0,10)).getTime() // ISO-8601 encoded UTC date string
-        if (!formattedData.has(date)) {
-          formattedData.set(date, 1)
-        } else {
-          formattedData.set(date, formattedData.get(date) + 1)
-        }
-        if (formattedData.get(date) > maxIncrement) maxIncrement = formattedData.get(date)
-        // update progress tracking
-        addNumberFetched()
-      })
+      data.repository.stargazers.edges.forEach(handleEdge)
 
       // update progress tracking
       if (onProgress) {
@@ -304,6 +306,18 @@ class GithubFetcher {
     const createdAt = preparationData.repository.createdAt
     let maxIncrement = 0
 
+    const handleEdge = edge => {
+      const date = new Date(edge.starredAt.slice(0,10)).getTime() // ISO-8601 encoded UTC date string
+      if (!formattedData.has(date)) {
+        formattedData.set(date, 1)
+      } else {
+        formattedData.set(date, formattedData.get(date) + 1)
+      }
+      if (formattedData.get(date) > maxIncrement) maxIncrement = formattedData.get(date)
+      // update progress tracking
+      addNumberFetched()
+    }
+
     // data traversal, 100 edges/request
     do {
       if (shouldAbort) {
@@ -322,17 +336,7 @@ class GithubFetcher {
       // update variables
 
       // destructure data from the JSON
-      data.repository.forks.nodes.forEach(node => {
-        const date = new Date(node.createdAt.slice(0,10)).getTime() // ISO-8601 encoded UTC date string
-        if (!formattedData.has(date)) {
-          formattedData.set(date, 1)
-        } else {
-          formattedData.set(date, formattedData.get(date) + 1)
-        }
-        if (formattedData.get(date) > maxIncrement) maxIncrement = formattedData.get(date)
-        // update progress tracking
-        addNumberFetched()
-      })
+      data.repository.forks.nodes.forEach(handleEdge)
 
       // update progress tracking
       if (onProgress) {

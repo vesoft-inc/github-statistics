@@ -8,42 +8,30 @@ import COLORS from './Colors'
 
 
 class Star extends React.Component {
+  static formatter = (repo, data) => {
+    // star total data, index 0
+    let starTotal = { name: repo, data: [] }
+    // star  daily increment data, index 1
+    let starIncrement = { name: repo, data: [] }
 
-  _getStarIncrementData = () => {
-    const { data, ready } = this.props
-    const series = []
-    data.forEach((datamap, repo) => {
-      let data = []
-      if (!ready.get(repo)) return
-      datamap.forEach((value, key) => {
-        data.push({
-          date: key,
-          value: value,
-        })
+    let cumulativeStarCount = 0
+    data.forEach((value, key) => {
+      cumulativeStarCount += value
+      starTotal.data.push({
+        timestamp: key,
+        value: cumulativeStarCount,
       })
-      series.push({ name: repo, data })
+      starIncrement.data.push({
+        timestamp: key,
+        value: value,
+      })
     })
-    console.log('this bitch is called once')
-    return series
+
+    return [starTotal, starIncrement]
   }
 
-  _getStarTotalData = () => {
-    const { data, ready } = this.props
-    const series = []
-    data.forEach((datamap, repo) => {
-      let cumulativeStarCount = 0
-      let data = []
-      if (!ready.get(repo)) return
-      datamap.forEach((value, key) => {
-        cumulativeStarCount += value
-        data.push({
-          date: key,
-          value: cumulativeStarCount,
-        })
-      })
-      series.push({ name: repo, data })
-    })
-    return series
+  shouldComponentUpdate(nextProps) {
+    return !nextProps.loading && !Array.from(nextProps.ready.values()).includes(false)
   }
 
   _renderStatistics = () => {
@@ -63,26 +51,47 @@ class Star extends React.Component {
                   <Tag color={COLORS[index]}>
                     {pair[0]}
                   </Tag>
-                  <Row>
+                  <Row type="flex" align="middle" justify="space-between">
+                    <span className="stats-card">
+                      <Statistic title="Total stars" value={totalStar} prefix={<Icon type="star" />} />
+                    </span>
+                    <span className="stats-card">
+                      <Statistic title="Avg. stars/day" value={averageStarPerDay} precision={2} />
+                    </span>
+                    <span className="stats-card">
+                      <Statistic title="Max. stars/day" value={maxIncrement} />
+                    </span>
                   </Row>
-                  <span className="stats-card">
-                    <Statistic title="Total stars" value={totalStar} prefix={<Icon type="star" />} />
-                  </span>
-                  <span className="stats-card">
-                    <Statistic title="Avg. stars/day" value={averageStarPerDay} precision={2} />
-                  </span>
-                  <span className="stats-card">
-                    <Statistic title="Max. stars/day" value={maxIncrement} />
-                  </span>
                 </Row>
               </div>
             )
           }
-          return
+          return false
         }
       ))}
       </>
     )
+  }
+
+  _renderLines = (dataIndex) => {
+    const { data, ready } = this.props
+    const dataReady = Array.from(ready.values())
+    console.log("Lines are rendered")
+    return Array.from(data.values()).map((dataArray, index) => (
+      dataReady[index]
+        ?
+        <Line
+          type="monotone"
+          key={`star-chart-total-${dataArray[dataIndex].name}`}
+          data={dataArray[dataIndex].data}
+          dataKey="value"
+          name={dataArray[dataIndex].name}
+          stroke={COLORS[index]}
+          dot={false}
+        />
+        :
+      <></>
+    ))
   }
 
   _renderCharts = () => {
@@ -90,8 +99,6 @@ class Star extends React.Component {
 
     if (!Array.from(ready.values()).includes(true)) return
 
-    const seriesStarTotal = this._getStarTotalData()
-    const seriesStarIncrement = this._getStarIncrementData()
     return (
       <>
       <Row>
@@ -101,7 +108,7 @@ class Star extends React.Component {
               <CartesianGrid stroke="#ccc" strokeDasharray="2 7" />
               <Legend verticalAlign="top"/>
               <XAxis
-                dataKey="date"
+                dataKey="timestamp"
                 scale="time"
                 allowDuplicatedCategory={false}
                 type="number"
@@ -110,17 +117,7 @@ class Star extends React.Component {
               />
               <YAxis dataKey="value" label={{ value: 'total stars', angle: -90, position: 'insideBottomLeft' }}/>
               <ChartToolTip labelFormatter={ms => new Date(ms).toISOString().slice(0,10)}/>
-              {seriesStarTotal.map((serie, index) => (
-                <Line
-                  type="monotone"
-                  key={`star-chart-total-${serie.name}`}
-                  data={serie.data}
-                  dataKey="value"
-                  name={serie.name}
-                  stroke={COLORS[index]}
-                  dot={false}
-                />
-              ))}
+              {this._renderLines(0)}
             </LineChart>
           </ResponsiveContainer>
         </div>
@@ -130,7 +127,7 @@ class Star extends React.Component {
               <CartesianGrid stroke="#ccc" strokeDasharray="2 7" />
               <Legend verticalAlign="top"/>
               <XAxis
-                dataKey="date"
+                dataKey="timestamp"
                 scale="time"
                 allowDuplicatedCategory={false}
                 type="number"
@@ -139,17 +136,7 @@ class Star extends React.Component {
               />
               <YAxis dataKey="value" label={{ value: 'daily increment', angle: -90, position: 'insideBottomLeft' }}/>
               <ChartToolTip labelFormatter={ms => new Date(ms).toISOString().slice(0,10)}/>
-              {seriesStarIncrement.map((serie, index) => (
-                <Line
-                  type="monotone"
-                  key={`star-chart-increment-${serie.name}`}
-                  data={serie.data}
-                  dataKey="value"
-                  name={serie.name}
-                  stroke={COLORS[index]}
-                  dot={false}
-                />
-              ))}
+              {this._renderLines(1)}
             </LineChart>
           </ResponsiveContainer>
         </div>
@@ -174,6 +161,7 @@ Star.propTypes = {
   data: PropTypes.objectOf(Map),
   stats: PropTypes.objectOf(Map),
   ready: PropTypes.objectOf(Map),
+  loading: PropTypes.bool,
 }
 
 

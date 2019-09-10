@@ -3,12 +3,9 @@ import PropTypes from 'prop-types'
 
 import moment from 'moment'
 
-import { Card, Row, Col, Statistic, Icon, Descriptions, Anchor, Button, Input, Tag, Tooltip, message } from 'antd'
-import { LineChart, Label, AreaChart, Line, Area, CartesianGrid, XAxis, YAxis, ResponsiveContainer, Legend, Tooltip as ChartToolTip } from 'recharts'
+import { Row, Statistic, Icon, Tag } from 'antd'
 
 import COLORS from './Colors'
-
-const CENTER_FLEX = { display: 'flex', placeContent: 'center' }
 
 class Repository extends React.Component {
 
@@ -30,7 +27,7 @@ class Repository extends React.Component {
                     {pair[0]}
                   </Tag>
                 </Row>
-                <Row>
+                <Row type="flex" align="middle" justify="space-between">
                   <span className="stats-card">
                     <Statistic title="Repository" value={name} />
                   </span>
@@ -52,7 +49,7 @@ class Repository extends React.Component {
               </div>
             )
           }
-          return
+          return false
         }
       ))}
       </>
