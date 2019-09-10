@@ -44,6 +44,9 @@ class DataSection extends React.Component {
         console.log('TYPE DOESNOT EXIST')
         return 'ERROR'
     }
+
+    // data formatter
+    this.formatter = this.body.formatter
   }
 
 
@@ -92,7 +95,10 @@ class DataSection extends React.Component {
 
     const onUpdate = data => {
       if(this.state.data.has(repo)) {
-        this.state.data.set(repo, data)
+        this.state.data.set(
+          repo,
+          this.formatter ? this.formatter(repo, data) : data,
+        )
         this.setState({ data: this.state.data })
       }
     }
@@ -200,10 +206,10 @@ class DataSection extends React.Component {
   }
 
   _renderBody = () => {
-    const { data, stats, ready } = this.state
+    const { data, stats, ready, loading } = this.state
     const { repos } = this.props
 
-    return <this.body repos={repos} data={data} stats={stats} ready={ready}/>
+    return <this.body repos={repos} data={data} stats={stats} ready={ready} loading={loading}/>
   }
 
   render() {
@@ -218,11 +224,11 @@ class DataSection extends React.Component {
               {type}
             </div>
           </div>
-          <div className="data-card">
-            {this._renderUpdateAllButton()}
+          <div className="data-card"  style={{ marginLeft: 'auto' }}>
+            {this._renderRepoTags()}
           </div>
           <div className="data-card">
-            {this._renderRepoTags()}
+            {this._renderUpdateAllButton()}
           </div>
         </Row>
         <Progress
