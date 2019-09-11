@@ -168,6 +168,7 @@ class DataSection extends React.Component {
     return (
       <Button
         icon="cloud-download"
+        type="link"
         disabled={repos.length === 0}
         onClick={() => {
           this.setState({ loading: true })
@@ -184,7 +185,7 @@ class DataSection extends React.Component {
         }}
         loading={loading}
       >
-        Update
+        update
       </Button>
     )
   }
@@ -242,7 +243,7 @@ class DataSection extends React.Component {
           </div>
           <Progress
             type="circle"
-            strokeWidth={6}
+            strokeWidth={4}
             width={32}
             percent={this._getAllProgress()}
           />
@@ -250,7 +251,6 @@ class DataSection extends React.Component {
             {this._renderUpdateAllButton()}
           </div>
         </Row>
-        
         {this._renderBody()}
       </div>
     )
