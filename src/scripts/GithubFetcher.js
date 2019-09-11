@@ -417,6 +417,7 @@ class GithubFetcher {
     const formattedData = []
     let totalToFetch = 0
     let numberFetched = 0
+    let totalDownloads = 0
     const addNumberFetched = () => numberFetched += 1
 
     // Preparation query
@@ -427,41 +428,58 @@ class GithubFetcher {
     //   }
     // }
 
-    // Statistics variables
-    totalToFetch = data.repository.releases.nodes[0].releaseAssets.totalCount
-    let totalDownloads = 0
+    if (data.repository.releases.totalCount !== 0) {
+      // Statistics variables
+      totalToFetch = data.repository.releases.nodes[0].releaseAssets.totalCount
 
-    // get stats of each asset
-    data.repository.releases.nodes[0].releaseAssets.nodes.forEach(asset => {
-      formattedData.push({
-        id: asset.id,
-        name: asset.name,
-        updatedAt: asset.updatedAt,
-        contentType: asset.contentType,
-        createdAt: asset.createdAt,
-        downloadCount: asset.downloadCount,
+      // get stats of each asset
+      data.repository.releases.nodes[0].releaseAssets.nodes.forEach(asset => {
+        formattedData.push({
+          id: asset.id,
+          name: asset.name,
+          updatedAt: asset.updatedAt,
+          contentType: asset.contentType,
+          createdAt: asset.createdAt,
+          downloadCount: asset.downloadCount,
+        })
+
+        totalDownloads += asset.downloadCount
+
+        addNumberFetched()
+        if (onProgress) {
+          onProgress(getProgress(numberFetched, totalToFetch))
+        }
       })
 
-      totalDownloads += asset.downloadCount
-
-      addNumberFetched()
-      if (onProgress) {
-        onProgress(getProgress(numberFetched, totalToFetch))
+      if (onUpdate) {
+        onUpdate(formattedData)
       }
-    })
 
-    if (onUpdate) {
-      onUpdate(formattedData)
-    }
+      if (onFinish) {
+        onFinish({
+          totalAssets: totalToFetch,
+          totalDownloads: totalDownloads,
+          name: data.repository.releases.nodes[0].name,
+          tagName: data.repository.releases.nodes[0].tagName,
+          createdAt: data.repository.releases.nodes[0].createdAt
+        })
+      }
+    } else {
+      if (onProgress) {
+        onProgress(100)
+      }
+      
+      if (onUpdate) {
+        onUpdate(formattedData)
+      }
 
-    if (onFinish) {
-      onFinish({
-        totalAssets: totalToFetch,
-        totalDownloads: totalDownloads,
-        name: data.repository.releases.nodes[0].name,
-        tagName: data.repository.releases.nodes[0].tagName,
-        createdAt: data.repository.releases.nodes[0].createdAt
-      })
+
+      if (onFinish) {
+        onFinish({
+          totalAssets: totalToFetch,
+          totalDownloads: totalDownloads,
+        })
+      }
     }
 
     return formattedData
