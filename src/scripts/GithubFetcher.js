@@ -29,33 +29,63 @@ class GithubFetcher {
    * @param onResult (@param result) function that will be called when test finishes
    * @return false if not exist, true otherwise
    */
-  testRepository = async (owner, name, onResult) => {
+  // testRepository = async (owner, name, onResult) => {
+  //   const variables = {
+  //     owner: owner,
+  //     name: name,
+  //   }
+
+  //   const query = /* GraphQL */ `
+  //     query getRepository($owner: String!, $name: String!){
+  //       repository(owner: $owner, name: $name) {
+  //         id
+  //       }
+  //     }
+  //   `
+
+  //   try {
+  //     await this.gqlClient.request(query, variables)
+  //   } catch (error) {
+  //     if (onResult) {
+  //       onResult(false)
+  //     }
+  //     return false
+  //   }
+
+  //   if (onResult) onResult(true)
+  //   return true
+  // }
+
+  /**
+   * suggest possible repositories based on current input
+   * @param onResult (@param result) function that will be called when search finishes
+   */
+  searchRepository = async (input, onResult) => {
     const variables = {
-      owner: owner,
-      name: name,
+      query: input,
     }
 
     const query = /* GraphQL */ `
-      query getRepository($owner: String!, $name: String!){
-        repository(owner: $owner, name: $name) {
-          id
+      query searchRepository($query: String!){
+        search(query: $query, first: 5, type: REPOSITORY) {
+          codeCount
+          nodes {
+            ...on Repository {
+              nameWithOwner
+            }
+          }
         }
       }
     `
+    let formattedData = []
 
-    try {
-      await this.gqlClient.request(query, variables)
-    } catch (error) {
-      if (onResult) {
-        onResult(false)
-      }
-      return false
-    }
+    const data = await this.gqlClient.request(query, variables)
 
-    if (onResult) {
-      onResult(true)
-    }
-    return true
+    data.search.nodes.forEach(repo => formattedData.push(repo.nameWithOwner))
+
+    if (onResult) onResult(formattedData)
+
+    return formattedData
   }
 
   /**
@@ -92,9 +122,7 @@ class GithubFetcher {
     `
 
     // update progress tracking
-    if (onProgress) {
-      onProgress(10)
-    }
+    if (onProgress) onProgress(10)
 
     const data = await this.gqlClient.request(query, variables)
     // if (shouldAbort) {
@@ -112,13 +140,9 @@ class GithubFetcher {
     }
 
     // update progress tracking
-    if (onProgress) {
-      onProgress(100)
-    }
+    if (onProgress) onProgress(100)
 
-    if (onFinish) {
-      onFinish(formattedData)
-    }
+    if (onFinish) onFinish(formattedData)
 
     return formattedData
   }
@@ -133,7 +157,7 @@ class GithubFetcher {
    * @param shouldAbort function that returns a boolean which determines whether fetching should abort
    * @returns Object that contains statistics
    */
-  fetchStargazerData = async (owner, name, onUpdate, onFinish, onProgress, shouldAbort) => {
+  fetchStargazerData = async (owner, name, onUpdate = () => {}, onFinish, onProgress, shouldAbort) => {
     const preparationVariables = {
       owner: owner,
       name: name,
@@ -196,11 +220,7 @@ class GithubFetcher {
 
     // data traversal, 100 edges/request
     do {
-      if (shouldAbort) {
-        if (shouldAbort()) {
-          return
-        }
-      }
+      if (shouldAbort) if (shouldAbort()) return
 
       const variables = {
         owner: owner,
@@ -216,9 +236,7 @@ class GithubFetcher {
       data.repository.stargazers.edges.forEach(handleEdge)
 
       // update progress tracking
-      if (onProgress) {
-        onProgress(getProgress(numberFetched, totalToFetch))
-      }
+      if (onProgress) onProgress(getProgress(numberFetched, totalToFetch))
 
       // track class-level variables
       previousEndCursor = data.repository.stargazers.pageInfo.endCursor // pagination
@@ -232,16 +250,12 @@ class GithubFetcher {
       }
     } while (previousEndCursor !== null)
 
-    if (onUpdate) {
-      onUpdate(formattedData)
-    }
-    if (onFinish) {
-      onFinish({
-        total: totalToFetch,
-        maxIncrement,
-        createdAt,
-      })
-    }
+    if (onUpdate) onUpdate(formattedData)
+    if (onFinish) onFinish({
+      total: totalToFetch,
+      maxIncrement,
+      createdAt,
+    })
 
     return formattedData
   }
@@ -320,11 +334,8 @@ class GithubFetcher {
 
     // data traversal, 100 edges/request
     do {
-      if (shouldAbort) {
-        if (shouldAbort()) {
-          return
-        }
-      }
+      if (shouldAbort) if (shouldAbort()) return
+
       const variables = {
         owner: owner,
         name: name,
@@ -339,9 +350,7 @@ class GithubFetcher {
       data.repository.forks.nodes.forEach(handleNode)
 
       // update progress tracking
-      if (onProgress) {
-        onProgress(getProgress(numberFetched, totalToFetch))
-      }
+      if (onProgress) onProgress(getProgress(numberFetched, totalToFetch))
 
       // track class-level variables
       previousEndCursor = data.repository.forks.pageInfo.endCursor // pagination
@@ -355,16 +364,12 @@ class GithubFetcher {
       }
     } while (previousEndCursor !== null)
 
-    if (onUpdate) {
-      onUpdate(formattedData)
-    }
-    if (onFinish) {
-      onFinish({
-        total: totalToFetch,
-        maxIncrement,
-        createdAt,
-      })
-    }
+    if (onUpdate) onUpdate(formattedData)
+    if (onFinish) onFinish({
+      total: totalToFetch,
+      maxIncrement,
+      createdAt,
+    })
 
     return formattedData
   }
@@ -446,43 +451,29 @@ class GithubFetcher {
         totalDownloads += asset.downloadCount
 
         addNumberFetched()
-        if (onProgress) {
-          onProgress(getProgress(numberFetched, totalToFetch))
-        }
+        if (onProgress) onProgress(getProgress(numberFetched, totalToFetch))
       })
 
-      if (onProgress) {
-        onProgress(100)
-      }
+      if (onProgress) onProgress(100)
 
-      if (onUpdate) {
-        onUpdate(formattedData)
-      }
+      if (onUpdate) onUpdate(formattedData)
 
-      if (onFinish) {
-        onFinish({
-          totalAssets: totalToFetch,
-          totalDownloads: totalDownloads,
-          name: data.repository.releases.nodes[0].name,
-          tagName: data.repository.releases.nodes[0].tagName,
-          createdAt: data.repository.releases.nodes[0].createdAt
-        })
-      }
+      if (onFinish) onFinish({
+        totalAssets: totalToFetch,
+        totalDownloads: totalDownloads,
+        name: data.repository.releases.nodes[0].name,
+        tagName: data.repository.releases.nodes[0].tagName,
+        createdAt: data.repository.releases.nodes[0].createdAt
+      })
     } else {
-      if (onProgress) {
-        onProgress(100)
-      }
+      if (onProgress) onProgress(100)
 
-      if (onUpdate) {
-        onUpdate(formattedData)
-      }
+      if (onUpdate) onUpdate(formattedData)
 
-      if (onFinish) {
-        onFinish({
-          totalAssets: totalToFetch,
-          totalDownloads: totalDownloads,
-        })
-      }
+      if (onFinish) onFinish({
+        totalAssets: totalToFetch,
+        totalDownloads: totalDownloads,
+      })
     }
 
     return formattedData
