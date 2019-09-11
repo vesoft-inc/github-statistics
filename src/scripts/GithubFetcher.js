@@ -451,6 +451,10 @@ class GithubFetcher {
         }
       })
 
+      if (onProgress) {
+        onProgress(100)
+      }
+
       if (onUpdate) {
         onUpdate(formattedData)
       }
@@ -468,11 +472,10 @@ class GithubFetcher {
       if (onProgress) {
         onProgress(100)
       }
-      
+
       if (onUpdate) {
         onUpdate(formattedData)
       }
-
 
       if (onFinish) {
         onFinish({
