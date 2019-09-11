@@ -6,11 +6,14 @@ import { connect } from 'react-redux'
 import TYPES from './DataTypes'
 import '../css/DataSection.css'
 
-import { Card, Progress, Button, Row, Col, Icon, Tag } from 'antd'
+import { Progress, Button, Row, Icon, Tag } from 'antd'
 import GithubFetcher from '../scripts/GithubFetcher'
 
-import Star from './sections/Star'
 import Repository from './sections/Repository'
+import Star from './sections/Star'
+import Fork from './sections/Fork'
+
+import Release from './sections/Release'
 
 class DataSection extends React.Component {
   constructor(props) {
@@ -31,7 +34,7 @@ class DataSection extends React.Component {
 
     switch (type) {
       case TYPES.REPO:
-        this.icon = <Icon type="book" style={{ fontSize: '24px', color: '#000000' }} />
+        this.icon = <Icon type="book" style={{ fontSize: '24px', color: '#333333' }} />
         this.body = Repository
         this.fetchCall = this.fetcher.fetchRepositoryData
         break
@@ -39,6 +42,16 @@ class DataSection extends React.Component {
         this.icon = <Icon type="star" style={{ fontSize: '24px', color: '#ffb900' }} />
         this.body = Star
         this.fetchCall = this.fetcher.fetchStargazerData
+        break
+      case TYPES.FORK:
+        this.icon = <Icon type="fork" style={{ fontSize: '24px', color: '#333333' }} />
+        this.body = Fork
+        this.fetchCall = this.fetcher.fetchForkData
+        break
+      case TYPES.RELEASE:
+        this.icon = <Icon type="tag" style={{ fontSize: '24px', color: '#333333' }} />
+        this.body = Release
+        this.fetchCall = this.fetcher.fetchReleaseData
         break
       default:
         console.log('TYPE DOESNOT EXIST')
@@ -144,8 +157,8 @@ class DataSection extends React.Component {
    */
   _getAllProgress = () => {
     const { progress } = this.state
-    return Array.from(progress.values()).reduce((a, b) => a + b, 0)
-    / (progress.size === 0 ? 1 : progress.size)
+    return Math.floor(Array.from(progress.values()).reduce((a, b) => a + b, 0)
+    / (progress.size === 0 ? 1 : progress.size))
   }
 
   _renderUpdateAllButton = () => {
@@ -227,16 +240,17 @@ class DataSection extends React.Component {
           <div className="data-card"  style={{ marginLeft: 'auto' }}>
             {this._renderRepoTags()}
           </div>
+          <Progress
+            type="circle"
+            strokeWidth={6}
+            width={32}
+            percent={this._getAllProgress()}
+          />
           <div className="data-card">
             {this._renderUpdateAllButton()}
           </div>
         </Row>
-        <Progress
-          strokeWidth={1}
-          width={32}
-          percent={this._getAllProgress()}
-          showInfo={false}
-        />
+        
         {this._renderBody()}
       </div>
     )

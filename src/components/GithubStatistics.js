@@ -6,7 +6,6 @@ import PropTypes from 'prop-types'
 import TYPES from './DataTypes'
 
 import { Card, Row, Col, Statistic, Icon, Descriptions, Anchor, Button, Input, Tag, Tooltip, message } from 'antd'
-import { LineChart, AreaChart, Line, Area, CartesianGrid, XAxis, YAxis, ResponsiveContainer, Tooltip as ChartToolTip } from 'recharts'
 
 import DataSection from './DataSection'
 
@@ -15,7 +14,7 @@ import GithubFetcher from '../scripts/GithubFetcher'
 import { updateState, updateStatsField } from '../actions'
 
 const CENTER_FLEX = { display: 'flex', placeContent: 'center' }
-const CENTER_LEFT_FLEX = { display: 'flex', justifyContent: 'flex-start', alignContent: 'center'}
+// const CENTER_LEFT_FLEX = { display: 'flex', justifyContent: 'flex-start', alignContent: 'center'}
 
 // message.config({
 //   top: 60,
@@ -34,7 +33,7 @@ class GithubStatistics extends React.Component {
       deleteRepo: '',
     }
 
-    this.GithubFetcher = new GithubFetcher('05c1acf261f6b223411c73d8b71cb1a30ce9186a')
+    this.fetcher = new GithubFetcher('05c1acf261f6b223411c73d8b71cb1a30ce9186a')
 
     this.props.updateState("githubApiToken", '05c1acf261f6b223411c73d8b71cb1a30ce9186a')
   }
@@ -63,7 +62,7 @@ class GithubStatistics extends React.Component {
     const name = repo.slice(slashIndex + 1)
 
     this.setState({ testingRepo: true })
-    this.GithubFetcher.testRepository(owner, name,
+    this.fetcher.testRepository(owner, name,
       result => {
         this.setState({ testingRepo: false })
         if (result) {
@@ -73,29 +72,6 @@ class GithubStatistics extends React.Component {
           message.error('Repository not found')
         }
       }
-    )
-  }
-
-  _renderForkStatistics = () => {
-    const { totalFork, maxIncrement, createdAt } = this.props.forkStats
-
-    const dateSinceCreated = Math.floor((Date.now() - new Date(createdAt).valueOf()) / (24*60*60*1000))
-    const averageForkPerDay = totalFork / dateSinceCreated
-
-    return (
-      <div>
-        <Row>
-          <Col span={8}><Card bordered={false}>
-            <Statistic title="Total public forks" value={totalFork} prefix={<Icon type="star" />} />
-          </Card></Col>
-          <Col span={8}><Card bordered={false}>
-            <Statistic title="Avg. fork/day" value={averageForkPerDay} precision={2} />
-          </Card></Col>
-          <Col span={8}><Card bordered={false}>
-            <Statistic title="Max increment a day" value={maxIncrement} />
-          </Card></Col>
-        </Row>
-      </div>
     )
   }
 
@@ -140,67 +116,6 @@ class GithubStatistics extends React.Component {
       </div>
     )
   }
-
-
-
-  _renderForkCharts = () => (
-    <div>
-      <Row>
-        Total Forks
-      </Row>
-      <Row>
-        <Card bordered={false} bodyStyle={CENTER_FLEX}>
-          <ResponsiveContainer width="80%" height={300}>
-            <AreaChart data={this._getForkTotalData()}>
-              <defs>
-                <linearGradient id="forkGradientArea" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#333" stopOpacity={0.8}/>
-                  <stop offset="95%" stopColor="#333" stopOpacity={0}/>
-                </linearGradient>
-              </defs>
-              <Area type="monotone" dataKey="forks" stroke="#333" fill={"url(#forkGradientArea)"} dot={false}/>
-              <CartesianGrid stroke="#ccc" strokeDasharray="2 7" />
-              <XAxis
-                dataKey="date"
-                domain = {['auto', 'auto']}
-                type="number"
-                tickFormatter={ms => new Date(ms).toISOString().slice(0,10)}
-              />
-              <YAxis />
-              <ChartToolTip
-              // formatter={(value, name) => [value, new Date(name).toISOString().slice(0,10)]}
-                labelFormatter={ms => new Date(ms).toISOString().slice(0,10)}
-              />
-            </AreaChart>
-          </ResponsiveContainer>
-        </Card>
-      </Row>
-      <Row>
-        Daily increment
-      </Row>
-      <Row>
-        <Card bordered={false} bodyStyle={CENTER_FLEX}>
-          <ResponsiveContainer width="80%" height={300}>
-            <LineChart data={this._getForkIncrementData()}>
-              <Line type="monotone" dataKey="forks" stroke="#333" dot={false}/>
-              <CartesianGrid stroke="#ccc" strokeDasharray="3 7" />
-              <XAxis
-                dataKey="date"
-                domain = {['auto', 'auto']}
-                type="number"
-                tickFormatter={ms => new Date(ms).toISOString().slice(0,10)}
-              />
-              <YAxis />
-              <ChartToolTip
-                // formatter={(value, name) => [value, new Date(name).toISOString().slice(0,10)]}
-                labelFormatter={ms => new Date(ms).toISOString().slice(0,10)}
-              />
-            </LineChart>
-          </ResponsiveContainer>
-        </Card>
-      </Row>
-    </div>
-  )
 
   _renderTags = () => {
     const { repos } = this.state
@@ -305,47 +220,17 @@ class GithubStatistics extends React.Component {
               deleteRepo={deleteRepo}
             />
 
-            {/* <DataUnit
-              id="Repository"
-              title="Repository"
-              iconType="book"
-              iconColor="#000"
-              action={this._fetchRepositoryData()}
-            >
-              {this._renderRepositoryStatistics()}
-            </DataUnit>
+            <DataSection
+              type={TYPES.FORK}
+              repos={repos}
+              deleteRepo={deleteRepo}
+            />
 
-            <DataUnit
-              id="Star"
-              title="Star Trend"
-              iconType="star"
-              iconColor="#ffb900"
-              action={this._fetchStargazerData()}
-            >
-              {this._renderStarStatistics()}
-              {this._renderStarCharts()}
-            </DataUnit>
-
-            <DataUnit
-              id="Fork"
-              title="Forks"
-              iconType="fork"
-              iconColor="#333"
-              action={this._fetchForkData()}
-            >
-              {this._renderForkStatistics()}
-              {this._renderForkCharts()}
-            </DataUnit>
-
-            <DataUnit
-              id="Release"
-              title="Latest Release"
-              iconType="tag"
-              iconColor="#333"
-              action={this._fetchReleaseData()}
-            >
-              {this._renderReleaseStatistics()}
-            </DataUnit> */}
+            <DataSection
+              type={TYPES.RELEASE}
+              repos={repos}
+              deleteRepo={deleteRepo}
+            />
           </div>
         </div>
       </div>

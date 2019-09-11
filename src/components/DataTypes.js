@@ -7,5 +7,6 @@ export default {
   REPO: 'Repository',
   STAR: 'Star',
   FORK: 'Fork',
+  COMMIT: 'Commit',
   RELEASE: 'Release',
 }

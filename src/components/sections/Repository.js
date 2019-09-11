@@ -9,7 +9,7 @@ import COLORS from './Colors'
 
 class Repository extends React.Component {
 
-  _renderStatistics = () => {
+  _render = () => {
     const { stats, ready } = this.props
 
     return (
@@ -21,7 +21,7 @@ class Repository extends React.Component {
             const dateSinceCreated = Math.floor((Date.now() - new Date(createdAt).valueOf()) / (24*60*60*1000))
 
             return (
-              <div key={`repo-statistics-${pair[0]}`}>
+              <div key={`repo-${pair[0]}`}>
                 <Row>
                   <Tag color={COLORS[index]}>
                     {pair[0]}
@@ -59,7 +59,7 @@ class Repository extends React.Component {
   render() {
     return (
       <>
-      {this._renderStatistics()}
+      {this._render()}
       </>
     )
   }
