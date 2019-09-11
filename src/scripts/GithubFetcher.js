@@ -237,7 +237,7 @@ class GithubFetcher {
     }
     if (onFinish) {
       onFinish({
-        totalStar: totalToFetch,
+        total: totalToFetch,
         maxIncrement,
         createdAt,
       })
@@ -306,8 +306,8 @@ class GithubFetcher {
     const createdAt = preparationData.repository.createdAt
     let maxIncrement = 0
 
-    const handleEdge = edge => {
-      const date = new Date(edge.starredAt.slice(0,10)).getTime() // ISO-8601 encoded UTC date string
+    const handleNode = node => {
+      const date = new Date(node.createdAt.slice(0,10)).getTime() // ISO-8601 encoded UTC date string
       if (!formattedData.has(date)) {
         formattedData.set(date, 1)
       } else {
@@ -336,7 +336,7 @@ class GithubFetcher {
       // update variables
 
       // destructure data from the JSON
-      data.repository.forks.nodes.forEach(handleEdge)
+      data.repository.forks.nodes.forEach(handleNode)
 
       // update progress tracking
       if (onProgress) {
@@ -360,7 +360,7 @@ class GithubFetcher {
     }
     if (onFinish) {
       onFinish({
-        totalFork: totalToFetch,
+        total: totalToFetch,
         maxIncrement,
         createdAt,
       })
