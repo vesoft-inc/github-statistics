@@ -2,7 +2,9 @@ import React from 'react'
 import PropTypes from 'prop-types'
 
 import { Row, Statistic, Icon, Tag } from 'antd'
-import { LineChart, Line, CartesianGrid, XAxis, YAxis, ResponsiveContainer, Legend, Tooltip as ChartToolTip } from 'recharts'
+// import { LineChart, Line, CartesianGrid, XAxis, YAxis, ResponsiveContainer, Legend, Tooltip as ChartToolTip } from 'recharts'
+import Highcharts from 'highcharts'
+import HighchartsReact from 'highcharts-react-official'
 
 import COLORS from './Colors'
 
@@ -17,14 +19,8 @@ class Star extends React.Component {
     let cumulativeStarCount = 0
     data.forEach((value, key) => {
       cumulativeStarCount += value
-      starTotal.data.push({
-        timestamp: key,
-        value: cumulativeStarCount,
-      })
-      starIncrement.data.push({
-        timestamp: key,
-        value: value,
-      })
+      starTotal.data.push([key, cumulativeStarCount])
+      starIncrement.data.push([key, value])
     })
 
     return [starTotal, starIncrement]
@@ -73,77 +69,144 @@ class Star extends React.Component {
     )
   }
 
-  _renderLines = (dataIndex) => {
-    const { data, ready } = this.props
-    const dataReady = Array.from(ready.values())
-    console.log("Lines are rendered")
-    return Array.from(data.values()).map((dataArray, index) => (
-      dataReady[index]
-        ?
-        <Line
-          type="monotone"
-          key={`star-chart-total-${dataArray[dataIndex].name}`}
-          data={dataArray[dataIndex].data}
-          dataKey="value"
-          name={dataArray[dataIndex].name}
-          stroke={COLORS[index]}
-          dot={false}
-        />
-        :
-      <></>
-    ))
-  }
-
   _renderCharts = () => {
-    const { ready } = this.props
+    const { data, ready } = this.props
 
     if (!Array.from(ready.values()).includes(true)) return
 
     return (
       <>
-      <Row>
-        <div>
-          <ResponsiveContainer width="100%" height={300}>
-            <LineChart>
-              <CartesianGrid stroke="#ccc" strokeDasharray="2 7" />
-              <Legend verticalAlign="top"/>
-              <XAxis
-                dataKey="timestamp"
-                scale="time"
-                allowDuplicatedCategory={false}
-                type="number"
-                domain = {['auto', 'auto']}
-                tickFormatter={ms => new Date(ms).toISOString().slice(0,10)}
-              />
-              <YAxis dataKey="value" label={{ value: 'total stars', angle: -90, position: 'insideBottomLeft' }}/>
-              <ChartToolTip labelFormatter={ms => new Date(ms).toISOString().slice(0,10)}/>
-              {this._renderLines(0)}
-            </LineChart>
-          </ResponsiveContainer>
-        </div>
-        <div>
-          <ResponsiveContainer width="100%" height={300}>
-            <LineChart>
-              <CartesianGrid stroke="#ccc" strokeDasharray="2 7" />
-              <Legend verticalAlign="top"/>
-              <XAxis
-                dataKey="timestamp"
-                scale="time"
-                allowDuplicatedCategory={false}
-                type="number"
-                domain = {['auto', 'auto']}
-                tickFormatter={ms => new Date(ms).toISOString().slice(0,10)}
-              />
-              <YAxis dataKey="value" label={{ value: 'daily increment', angle: -90, position: 'insideBottomLeft' }}/>
-              <ChartToolTip labelFormatter={ms => new Date(ms).toISOString().slice(0,10)}/>
-              {this._renderLines(1)}
-            </LineChart>
-          </ResponsiveContainer>
-        </div>
-      </Row>
+      <HighchartsReact
+        highcharts={Highcharts}
+        options={{
+          chart: {
+            type: 'line',
+            zoomType: 'x',
+          },
+          title: {
+            text: undefined,
+          },
+          xAxis: {
+            type: 'datetime',
+          },
+          yAxis: {
+            title: {
+              text: 'total stars',
+            },
+          },
+          colors: COLORS,
+          tooltip: {
+            split: true,
+          },
+          credits: {
+            enabled: false,
+          },
+          series: Array.from(data.values()).map(dataArray => dataArray[0]),
+        }}
+      />
+      <HighchartsReact
+        highcharts={Highcharts}
+        options={{
+          chart: {
+            type: 'column',
+            zoomType: 'x',
+          },
+          title: {
+            text: undefined,
+          },
+          xAxis: {
+            type: 'datetime',
+          },
+          yAxis: {
+            title: {
+              text: 'star increment/day',
+            },
+          },
+          colors: COLORS,
+          tooltip: {
+            split: true,
+          },
+          credits: {
+            enabled: false,
+          },
+          series: Array.from(data.values()).map(dataArray => dataArray[1]),
+        }}
+      />
       </>
     )
   }
+
+  // _renderLines = (dataIndex) => {
+  //   const { data, ready } = this.props
+  //   const dataReady = Array.from(ready.values())
+  //   console.log("Lines are rendered")
+  //   return Array.from(data.values()).map((dataArray, index) => (
+  //     dataReady[index]
+  //       ?
+  //       <Line
+  //         type="monotone"
+  //         key={`star-chart-total-${dataArray[dataIndex].name}`}
+  //         data={dataArray[dataIndex].data}
+  //         dataKey="value"
+  //         name={dataArray[dataIndex].name}
+  //         stroke={COLORS[index]}
+  //         dot={false}
+  //       />
+  //       :
+  //     <></>
+  //   ))
+  // }
+
+  // _renderCharts = () => {
+  //   const { ready } = this.props
+
+  //   if (!Array.from(ready.values()).includes(true)) return
+
+  //   return (
+  //     <>
+  //     <Row>
+  //       <div>
+  //         <ResponsiveContainer width="100%" height={300}>
+  //           <LineChart>
+  //             <CartesianGrid stroke="#ccc" strokeDasharray="2 7" />
+  //             <Legend verticalAlign="top"/>
+  //             <XAxis
+  //               dataKey="timestamp"
+  //               scale="time"
+  //               allowDuplicatedCategory={false}
+  //               type="number"
+  //               domain = {['auto', 'auto']}
+  //               tickFormatter={ms => new Date(ms).toISOString().slice(0,10)}
+  //             />
+  //             <YAxis dataKey="value" label={{ value: 'total stars', angle: -90, position: 'insideBottomLeft' }}/>
+  //             <ChartToolTip labelFormatter={ms => new Date(ms).toISOString().slice(0,10)}/>
+  //             {this._renderLines(0)}
+  //           </LineChart>
+  //         </ResponsiveContainer>
+  //       </div>
+  //       <div>
+  //         <ResponsiveContainer width="100%" height={300}>
+  //           <LineChart>
+  //             <CartesianGrid stroke="#ccc" strokeDasharray="2 7" />
+  //             <Legend verticalAlign="top"/>
+  //             <XAxis
+  //               dataKey="timestamp"
+  //               scale="time"
+  //               allowDuplicatedCategory={false}
+  //               type="number"
+  //               domain = {['auto', 'auto']}
+  //               tickFormatter={ms => new Date(ms).toISOString().slice(0,10)}
+  //             />
+  //             <YAxis dataKey="value" label={{ value: 'daily increment', angle: -90, position: 'insideBottomLeft' }}/>
+  //             <ChartToolTip labelFormatter={ms => new Date(ms).toISOString().slice(0,10)}/>
+  //             {this._renderLines(1)}
+  //           </LineChart>
+  //         </ResponsiveContainer>
+  //       </div>
+  //     </Row>
+  //     </>
+  //   )
+  // }
 
   render() {
     return (
