@@ -1,6 +1,6 @@
 {
   "files": {
-    "main.css": "/github-statistics/static/css/main.25c002d2.chunk.css",
+    "main.css": "/github-statistics/static/css/main.5f17e333.chunk.css",
     "main.js": "/github-statistics/static/js/main.a13fdb80.chunk.js",
     "main.js.map": "/github-statistics/static/js/main.a13fdb80.chunk.js.map",
     "runtime~main.js": "/github-statistics/static/js/runtime~main.9181d6dc.js",
@@ -9,9 +9,9 @@
     "static/js/2.adcf89d7.chunk.js": "/github-statistics/static/js/2.adcf89d7.chunk.js",
     "static/js/2.adcf89d7.chunk.js.map": "/github-statistics/static/js/2.adcf89d7.chunk.js.map",
     "index.html": "/github-statistics/index.html",
-    "precache-manifest.90cf930589b045309491e97eb67f6d28.js": "/github-statistics/precache-manifest.90cf930589b045309491e97eb67f6d28.js",
+    "precache-manifest.3c656c55987e92dc7a2c0b45d4fa8e91.js": "/github-statistics/precache-manifest.3c656c55987e92dc7a2c0b45d4fa8e91.js",
     "service-worker.js": "/github-statistics/service-worker.js",
     "static/css/2.9692cc1a.chunk.css.map": "/github-statistics/static/css/2.9692cc1a.chunk.css.map",
-    "static/css/main.25c002d2.chunk.css.map": "/github-statistics/static/css/main.25c002d2.chunk.css.map"
+    "static/css/main.5f17e333.chunk.css.map": "/github-statistics/static/css/main.5f17e333.chunk.css.map"
   }
 }
