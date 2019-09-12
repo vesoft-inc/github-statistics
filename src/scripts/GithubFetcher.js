@@ -180,7 +180,7 @@ class GithubFetcher {
           stargazers(first: 100, after: $previousEndCursor) {
             pageInfo {
               endCursor
-              startCursor
+              hasNextPage
             }
             edges {
               starredAt
@@ -194,17 +194,17 @@ class GithubFetcher {
     const formattedData = new Map()
     let pageIndex = 0
     let totalToFetch = 0
+    let maxIncrement = 0
     let numberFetched = 0
     let previousEndCursor = null
-    const addNumberFetched = () => numberFetched += 1
+    let hasNextPage = false
 
     // Preparation query
     const preparationData = await this.gqlClient.request(preparationQuery, preparationVariables)
 
-    // Statistics variables
+    // from preparation
     totalToFetch = preparationData.repository.stargazers.totalCount
     const createdAt = preparationData.repository.createdAt
-    let maxIncrement = 0
 
     const handleEdge = edge => {
       const date = new Date(edge.starredAt.slice(0,10)).getTime() // ISO-8601 encoded UTC date string
@@ -215,7 +215,7 @@ class GithubFetcher {
       }
       if (formattedData.get(date) > maxIncrement) maxIncrement = formattedData.get(date)
       // update progress tracking
-      addNumberFetched()
+      numberFetched += 1
     }
 
     // data traversal, 100 edges/request
@@ -230,17 +230,14 @@ class GithubFetcher {
       // query for data
       const data = await this.gqlClient.request(query, variables)
 
-      // update variables
-
-      // destructure data from the JSON
       data.repository.stargazers.edges.forEach(handleEdge)
 
       // update progress tracking
       if (onProgress) onProgress(getProgress(numberFetched, totalToFetch))
 
-      // track class-level variables
-      previousEndCursor = data.repository.stargazers.pageInfo.endCursor // pagination
-
+      // track loop-level variables
+      previousEndCursor = data.repository.stargazers.pageInfo.endCursor
+      hasNextPage = data.repository.stargazers.pageInfo.hasNextPage
       // update pageIndex
       pageIndex += 1
 
@@ -248,7 +245,7 @@ class GithubFetcher {
       if (this.liveUpdate && onUpdate && pageIndex % this.pagesPerUpdate === 0) {
         onUpdate(formattedData)
       }
-    } while (previousEndCursor !== null)
+    } while (hasNextPage)
 
     if (onUpdate) onUpdate(formattedData)
     if (onFinish) onFinish({
@@ -294,7 +291,7 @@ class GithubFetcher {
           forks(first: 100, after: $previousEndCursor) {
             pageInfo {
               endCursor
-              startCursor
+              hasNextPage
             }
             nodes {
               createdAt
@@ -308,17 +305,19 @@ class GithubFetcher {
     const formattedData = new Map()
     let pageIndex = 0
     let totalToFetch = 0
+    let maxIncrement = 0
     let numberFetched = 0
     let previousEndCursor = null
-    const addNumberFetched = () => numberFetched += 1
+    let hasNextPage = false
 
     // Preparation query
     const preparationData = await this.gqlClient.request(preparationQuery, preparationVariables)
 
-    // Statistics variables
+    // from preparation
     totalToFetch = preparationData.repository.forks.totalCount
     const createdAt = preparationData.repository.createdAt
-    let maxIncrement = 0
+    
+
 
     const handleNode = node => {
       const date = new Date(node.createdAt.slice(0,10)).getTime() // ISO-8601 encoded UTC date string
@@ -329,7 +328,7 @@ class GithubFetcher {
       }
       if (formattedData.get(date) > maxIncrement) maxIncrement = formattedData.get(date)
       // update progress tracking
-      addNumberFetched()
+      numberFetched += 1
     }
 
     // data traversal, 100 edges/request
@@ -344,16 +343,14 @@ class GithubFetcher {
       // query for data
       const data = await this.gqlClient.request(query, variables)
 
-      // update variables
-
-      // destructure data from the JSON
       data.repository.forks.nodes.forEach(handleNode)
 
       // update progress tracking
       if (onProgress) onProgress(getProgress(numberFetched, totalToFetch))
 
-      // track class-level variables
-      previousEndCursor = data.repository.forks.pageInfo.endCursor // pagination
+      // track loop-level variables
+      previousEndCursor = data.repository.forks.pageInfo.endCursor
+      hasNextPage = data.repository.forks.pageInfo.hasNextPage
 
       // update pageIndex
       pageIndex += 1
@@ -362,13 +359,144 @@ class GithubFetcher {
       if (this.liveUpdate && onUpdate && pageIndex % this.pagesPerUpdate === 0) {
         onUpdate(formattedData)
       }
-    } while (previousEndCursor !== null)
+    } while (hasNextPage)
 
     if (onUpdate) onUpdate(formattedData)
     if (onFinish) onFinish({
       total: totalToFetch,
       maxIncrement,
       createdAt,
+    })
+
+    return formattedData
+  }
+
+  /**
+   * fetch repository low-level data
+   * @param owner owner of the repository
+   * @param name name of the repository
+   * @param onUpdate (data) function that will be called when a new data update is avaiable
+   * @param onFinish (stats) function that will be called when fetching is finished
+   * @param onProgress (progress) function that will be called when progress is updated
+   * @param shouldAbort function that returns a boolean which determines whether fetching should abort
+   * @returns Object that contains statistics
+   */
+  fetchCommitData = async (owner, name, onUpdate, onFinish, onProgress, shouldAbort) => {
+    const preparationVariables = {
+      owner: owner,
+      name: name,
+    }
+
+    // define the graphql query
+    const preparationQuery = /* GraphQL */ `
+      query prepareCommits($owner: String!, $name: String!) {
+        repository(owner: $owner, name: $name) {
+          defaultBranchRef {
+            # name
+            target {
+              ... on Commit {
+                oid
+                committedDate
+                history {
+                  totalCount
+                }
+              }
+            }
+          }
+        }
+      }
+    `
+    const query = /* GraphQL */ `
+      query getCommits($owner: String!, $name: String!, $previousEndCursor: String, $oid: GitObjectID!, $since: GitTimestamp!){
+        repository(owner: $owner, name: $name) {
+          object(oid: $oid) {
+            ... on Commit {
+              history(first: 100, after: $previousEndCursor, since: $since ) {
+                totalCount
+                pageInfo {
+                  endCursor
+                  hasNextPage
+                }
+                nodes {
+                  committedDate
+                  # message
+                }
+              }
+            }
+          }
+        }
+      }
+    `
+
+
+    // local variables
+    const formattedData = new Map()
+    let pageIndex = 0
+    let totalToFetch = 0
+    let numberFetched = 0
+    let maxIncrement = 0
+    let previousEndCursor = null
+    let hasNextPage = false
+
+    // Preparation query
+    const preparationData = await this.gqlClient.request(preparationQuery, preparationVariables)
+
+    // from preparation
+    totalToFetch = preparationData.repository.defaultBranchRef.target.history.totalCount
+    const headRefOid = preparationData.repository.defaultBranchRef.target.oid
+    const since = new Date(new Date(preparationData.repository.defaultBranchRef.target.committedDate)
+      .setFullYear(new Date(preparationData.repository.defaultBranchRef.target.committedDate).getFullYear() - 1))
+      .toISOString()
+
+    const handleNode = node => {
+      const date = new Date(node.committedDate.slice(0,10)).getTime() // ISO-8601 encoded UTC date string
+      if (!formattedData.has(date)) {
+        formattedData.set(date, 1)
+      } else {
+        formattedData.set(date, formattedData.get(date) + 1)
+      }
+      if (formattedData.get(date) > maxIncrement) maxIncrement = formattedData.get(date)
+      // update progress tracking
+      numberFetched += 1
+    }
+
+    // data traversal, 100 edges/request
+    do {
+      if (shouldAbort) if (shouldAbort()) return
+
+      const variables = {
+        owner: owner,
+        name: name,
+        oid: headRefOid,
+        since: since,
+        previousEndCursor: previousEndCursor
+      }
+      // query for data
+      const data = await this.gqlClient.request(query, variables)
+
+      totalToFetch = data.repository.object.history.totalCount
+      data.repository.object.history.nodes.forEach(handleNode)
+
+      // update progress tracking
+      if (onProgress) onProgress(getProgress(numberFetched, totalToFetch))
+
+      // track loop-level variables
+      previousEndCursor = data.repository.object.history.pageInfo.endCursor
+      hasNextPage = data.repository.object.history.pageInfo.hasNextPage
+      // update pageIndex
+      pageIndex += 1
+
+      // onUpdate callback if existed
+      if (this.liveUpdate && onUpdate && pageIndex % this.pagesPerUpdate === 0) {
+        onUpdate(formattedData)
+      }
+    } while (hasNextPage)
+
+    if (onUpdate) onUpdate(formattedData)
+    if (onFinish) onFinish({
+      total: totalToFetch,
+      maxIncrement,
+      createdAt: since,
     })
 
     return formattedData
@@ -423,7 +551,6 @@ class GithubFetcher {
     let totalToFetch = 0
     let numberFetched = 0
     let totalDownloads = 0
-    const addNumberFetched = () => numberFetched += 1
 
     // Preparation query
     const data = await this.gqlClient.request(query, variables)
@@ -434,7 +561,7 @@ class GithubFetcher {
     // }
 
     if (data.repository.releases.totalCount !== 0) {
-      // Statistics variables
+      // from preparation
       totalToFetch = data.repository.releases.nodes[0].releaseAssets.totalCount
 
       // get stats of each asset
@@ -450,7 +577,7 @@ class GithubFetcher {
 
         totalDownloads += asset.downloadCount
 
-        addNumberFetched()
+        numberFetched += 1
         if (onProgress) onProgress(getProgress(numberFetched, totalToFetch))
       })
 

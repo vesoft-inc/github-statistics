@@ -12,7 +12,7 @@ import GithubFetcher from '../scripts/GithubFetcher'
 import Repository from './sections/Repository'
 import Star from './sections/Star'
 import Fork from './sections/Fork'
-
+import Commit from './sections/Commit'
 import Release from './sections/Release'
 
 class DataSection extends React.Component {
@@ -47,6 +47,11 @@ class DataSection extends React.Component {
         this.icon = <Icon type="fork" style={{ fontSize: '24px', color: '#333333' }} />
         this.body = Fork
         this.fetchCall = this.fetcher.fetchForkData
+        break
+      case TYPES.COMMIT:
+        this.icon = <Icon type="history" style={{ fontSize: '24px', color: '#333333' }} />
+        this.body = Commit
+        this.fetchCall = this.fetcher.fetchCommitData
         break
       case TYPES.RELEASE:
         this.icon = <Icon type="tag" style={{ fontSize: '24px', color: '#333333' }} />
