@@ -25,6 +25,12 @@
 .sider {
 }
 
+@media(max-width:600px){
+  .sider {
+    display: none;
+  }
+}
+
 .content {
   /* text-align: center; */
   width: 100%;
