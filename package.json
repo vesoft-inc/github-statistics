@@ -1,10 +1,12 @@
 {
-  "name": "metrics-tracking",
+  "name": "github-statistics",
+  "homepage": "https://Priceincoding.github.io/github-statistics",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
     "@material-ui/core": "^4.3.3",
     "antd": "^3.22.0",
+    "gh-pages": "^2.1.1",
     "graphql": "^14.5.0",
     "graphql-request": "^1.8.2",
     "highcharts": "^7.2.0",
@@ -19,6 +21,8 @@
     "redux": "^4.0.4"
   },
   "scripts": {
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d build",
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
