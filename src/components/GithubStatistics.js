@@ -94,7 +94,7 @@ class GithubStatistics extends React.Component {
     return (
       repos.map((repo, index) => (
         <Tag key={"tag" + repo} color={COLORS[index]} closable onClose={() => this.deleteRepo(index)}>
-          {repo}
+          <a target="_blank" rel="noopener noreferrer" href={`https://github.com/${repo}`}>{repo}</a>
         </Tag>
       ))
     )
@@ -214,6 +214,12 @@ class GithubStatistics extends React.Component {
 
             <DataSection
               type={TYPES.FORK}
+              repos={repos}
+              deleteRepo={deleteRepo}
+            />
+
+            <DataSection
+              type={TYPES.COMMIT}
               repos={repos}
               deleteRepo={deleteRepo}
             />
