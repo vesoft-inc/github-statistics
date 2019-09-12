@@ -6,7 +6,7 @@ import { connect } from 'react-redux'
 import TYPES from './DataTypes'
 import '../css/DataSection.css'
 
-import { Progress, Button, Row, Icon, Tag } from 'antd'
+import { Progress, Button, Row, Icon, Tag, Popover } from 'antd'
 import GithubFetcher from '../scripts/GithubFetcher'
 
 import Repository from './sections/Repository'
@@ -39,6 +39,7 @@ class DataSection extends React.Component {
         this.fetchCall = this.fetcher.fetchRepositoryData
         break
       case TYPES.STAR:
+        this.info = 'Star trend data are huge, they might take minutes to load.'
         this.icon = <Icon type="star" style={{ fontSize: '24px', color: '#ffb900' }} />
         this.body = Star
         this.fetchCall = this.fetcher.fetchStargazerData
@@ -49,6 +50,7 @@ class DataSection extends React.Component {
         this.fetchCall = this.fetcher.fetchForkData
         break
       case TYPES.COMMIT:
+        this.info = 'Because of the API restriction, only commits in a recent year will be loaded.'
         this.icon = <Icon type="history" style={{ fontSize: '24px', color: '#333333' }} />
         this.body = Commit
         this.fetchCall = this.fetcher.fetchCommitData
@@ -242,6 +244,10 @@ class DataSection extends React.Component {
             <div className="section-title">
               {type}
             </div>
+            {this.info ?
+              <Popover className="info-tag" content={this.info} placement="left">
+                <Icon type="info-circle" />
+              </Popover> : null }
           </div>
           <div className="data-card"  style={{ marginLeft: 'auto' }}>
             {this._renderRepoTags()}

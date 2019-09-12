@@ -173,22 +173,20 @@ class GithubStatistics extends React.Component {
 
     return (
       <div>
-        <header>
-          <div className="header">
-            <Row type="flex" align="middle">
-              <Col className="header-section">
-                <a className="header-title" href="/">
-                  Github Stats
-                </a>
-              </Col>
-              <Col className="header-section flex-center">
-                {this._renderHeaderInput()}
-              </Col>
-              <Col className="header-section flex-center-left">
-                {this._renderTags()}
-              </Col>
-            </Row>
-          </div>
+        <header className="header">
+          <Row type="flex" align="middle">
+            <Col className="header-section">
+              <a className="header-title" href="/">
+                Github Stats
+              </a>
+            </Col>
+            <Col className="header-section flex-center">
+              {this._renderHeaderInput()}
+            </Col>
+            <Col className="header-section flex-center-left">
+              {this._renderTags()}
+            </Col>
+          </Row>
         </header>
         <div className="container">
           <div className="sider">
@@ -231,6 +229,9 @@ class GithubStatistics extends React.Component {
             />
           </div>
         </div>
+
+        <footer className="footer">
+        </footer>
       </div>
     )
   }
