@@ -186,6 +186,9 @@ class GithubStatistics extends React.Component {
             <Col className="header-section flex-center-left">
               {this._renderTags()}
             </Col>
+            <Col className="header-section flex-center" style={{ marginLeft: 'auto' }}>
+              <iframe src="https://ghbtns.com/github-btn.html?user=priceincoding&repo=github-statistics&type=star&count=true" frameBorder="0" scrolling="0" width="120px" height="20px" />
+            </Col>
           </Row>
         </header>
         <div className="container">
