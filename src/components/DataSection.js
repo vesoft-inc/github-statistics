@@ -164,8 +164,7 @@ class DataSection extends React.Component {
    */
   _getAllProgress = () => {
     const { progress } = this.state
-    return Math.floor(Array.from(progress.values()).reduce((a, b) => a + b, 0)
-    / (progress.size === 0 ? 1 : progress.size))
+    return Math.floor(Array.from(progress.values()).reduce((a, b) => a + b, 0)/ (progress.size === 0 ? 1 : progress.size))
   }
 
   _renderUpdateAllButton = () => {
