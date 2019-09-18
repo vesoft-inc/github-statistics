@@ -46,13 +46,22 @@ class GithubStatistics extends React.Component {
     ).bind(this)
   }
 
+  componentDidMount() {
+    this.setState({
+      repos: JSON.parse(localStorage.getItem("repos")),
+      deleteRepo: '',
+    })
+  }
+
   deleteRepo = index => {
     const { repos } = this.state
     const deleteRepo = repos[index]
-    repos.splice(index,1)
+    repos.splice(index, 1)
     this.setState({
       repos: [...repos],
       deleteRepo: deleteRepo,
+    }, () => {
+      localStorage.setItem("repos", JSON.stringify([...repos]))
     })
   }
 
@@ -60,11 +69,12 @@ class GithubStatistics extends React.Component {
     const { repos } = this.state
     if (repos.includes(repo)) {
       message.error(`${repo} is already added`)
-    }
-    else {
+    }else {
       this.setState({
         repos: [ ...repos, repo],
         deleteRepo: '',
+      }, () => {
+        localStorage.setItem("repos", JSON.stringify([...repos, repo]))
       })
     }
   }
@@ -104,7 +114,6 @@ class GithubStatistics extends React.Component {
     const { repos, input, testingRepo, suggestions } = this.state
 
     // const format = /^[a-z\d](?:[a-z\d]|-(?=[a-z\d])){0,38}\/{1}[a-z\d](?:[a-z\d]|-(?=[a-z\d])){0,38}$/i
-
     let hintMessage = ''
 
     // Conditions
