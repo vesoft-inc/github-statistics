@@ -47,10 +47,16 @@ class GithubStatistics extends React.Component {
   }
 
   componentDidMount() {
-    this.setState({
-      repos: JSON.parse(localStorage.getItem("repos")),
-      deleteRepo: '',
-    })
+    try {
+      if (JSON.parse(localStorage.getItem("repos"))) {
+        this.setState({
+          repos: JSON.parse(localStorage.getItem("repos")),
+          deleteRepo: '',
+        })
+      }
+    } catch (error) {
+      console.log(error)
+    }
   }
 
   deleteRepo = index => {
