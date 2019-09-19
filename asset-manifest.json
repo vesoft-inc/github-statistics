@@ -1,15 +1,15 @@
 {
   "files": {
     "main.css": "/github-statistics/static/css/main.d1eb3685.chunk.css",
-    "main.js": "/github-statistics/static/js/main.537252d3.chunk.js",
-    "main.js.map": "/github-statistics/static/js/main.537252d3.chunk.js.map",
+    "main.js": "/github-statistics/static/js/main.bcfceffe.chunk.js",
+    "main.js.map": "/github-statistics/static/js/main.bcfceffe.chunk.js.map",
     "runtime~main.js": "/github-statistics/static/js/runtime~main.9181d6dc.js",
     "runtime~main.js.map": "/github-statistics/static/js/runtime~main.9181d6dc.js.map",
     "static/css/2.9692cc1a.chunk.css": "/github-statistics/static/css/2.9692cc1a.chunk.css",
     "static/js/2.1a9f43e1.chunk.js": "/github-statistics/static/js/2.1a9f43e1.chunk.js",
     "static/js/2.1a9f43e1.chunk.js.map": "/github-statistics/static/js/2.1a9f43e1.chunk.js.map",
     "index.html": "/github-statistics/index.html",
-    "precache-manifest.3e2a85cda0a00ca2fd5c0b29852d9aa5.js": "/github-statistics/precache-manifest.3e2a85cda0a00ca2fd5c0b29852d9aa5.js",
+    "precache-manifest.56c39d2580a7d47fbfe7f91717484c78.js": "/github-statistics/precache-manifest.56c39d2580a7d47fbfe7f91717484c78.js",
     "service-worker.js": "/github-statistics/service-worker.js",
     "static/css/2.9692cc1a.chunk.css.map": "/github-statistics/static/css/2.9692cc1a.chunk.css.map",
     "static/css/main.d1eb3685.chunk.css.map": "/github-statistics/static/css/main.d1eb3685.chunk.css.map"
