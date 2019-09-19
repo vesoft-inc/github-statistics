@@ -14,6 +14,8 @@ import Star from './sections/Star'
 import Fork from './sections/Fork'
 import Commit from './sections/Commit'
 import Release from './sections/Release'
+import Issues from './sections/Issues'
+import PullRequests from './sections/PullRequests'
 
 class DataSection extends React.Component {
   constructor(props) {
@@ -59,6 +61,16 @@ class DataSection extends React.Component {
         this.icon = <Icon type="tag" style={{ fontSize: '24px', color: '#333333' }} />
         this.body = Release
         this.fetchCall = this.fetcher.fetchReleaseData
+        break
+      case TYPES.ISSUES:
+        this.icon = <Icon type="info-circle" style={{ fontSize: '24px', color: '#333333' }} />
+        this.body = Issues
+        this.fetchCall = this.fetcher.fetchIssuesData
+        break
+      case TYPES.PULLREQUESTS:
+        this.icon = <Icon type="pull-request" style={{ fontSize: '24px', color: '#333333' }} />
+        this.body = PullRequests
+        this.fetchCall = this.fetcher.fetchRequestsData
         break
       default:
         console.log('TYPE DOESNOT EXIST')

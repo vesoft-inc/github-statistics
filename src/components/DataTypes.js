@@ -9,4 +9,6 @@ export default {
   FORK: 'Fork',
   COMMIT: 'Commit',
   RELEASE: 'Release',
+  ISSUES: 'Issues',
+  PULLREQUESTS: 'Pull requests',
 }

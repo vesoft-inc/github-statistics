@@ -11,6 +11,13 @@ import OPTIONS from './ChartOptions'
 
 
 class Commit extends React.Component {
+  constructor(props) {
+    super(props)
+    this.state = {
+      isReset: false,
+      arr: []
+    }
+  }
   static formatter = (repo, data) => {
     // commit total data, index 0
     let total = { name: repo, data: [] }
@@ -33,6 +40,45 @@ class Commit extends React.Component {
 
   shouldComponentUpdate(nextProps) {
     return !nextProps.loading && !Array.from(nextProps.ready.values()).includes(false)
+  }
+
+  cloneMap(map) {
+    let obj = Object.create(null)
+    for (let [k, v] of map) {
+      obj[k] = v
+    }
+    obj = JSON.parse(JSON.stringify(obj))
+    let tmpMap = new Map()
+    for (let k of Object.keys(obj)) {
+      tmpMap.set(k, obj[k])
+    }
+    return tmpMap
+  }
+
+  componentWillReceiveProps(props) {
+    this.setState({
+      arr: this.cloneMap(props.data)
+    })
+  }
+
+  resetData(min, max) {
+    Array.from(this.state.arr.values()).map(dataArray => dataArray[0]).forEach((value, index) => {
+      let initial = 0
+      value.data.forEach((obj, index) => {
+        if (min <= obj[0] && max >= obj[0]) {
+          if (!initial) {
+            initial = obj[1]
+            value.data[index - 1] = 0
+          }
+        }
+        if (obj) {
+          obj[1] -= initial
+        }
+      })
+    })
+    this.setState({
+      isReset: true
+    })
   }
 
   _renderStatistics = () => {
@@ -85,8 +131,21 @@ class Commit extends React.Component {
         highcharts={Highcharts}
         options={{ ...OPTIONS,
           chart: {
-            type: 'line',
+            events: {
+              selection: (event) => {
+                if (!event.resetSelection) {
+                  var min = event.xAxis[0].min;
+                  var max = event.xAxis[0].max;
+                  this.resetData(min, max)
+                } else {
+                  this.setState({
+                    arr: this.cloneMap(data)
+                  })
+                }
+              }
+            },
             zoomType: 'x',
+            type: 'line'
           },
           xAxis: {
             type: 'datetime',
@@ -97,7 +156,7 @@ class Commit extends React.Component {
               text: 'total commits',
             },
           },
-          series: Array.from(data.values()).map(dataArray => dataArray[0]),
+          series: Array.from(this.state.arr.values()).map(dataArray => dataArray[0]),
         }}
       />
       <HighchartsReact

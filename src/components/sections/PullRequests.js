@@ -96,13 +96,13 @@ class Fork extends React.Component {
                   </Tag>
                   <Row type="flex" align="middle" justify="space-between">
                     <span className="stats-card">
-                      <Statistic title="Total forks" value={total} prefix={<Icon type="fork" />} />
+                      <Statistic title="Total pull requests" value={total} prefix={<Icon type="fork" />} />
                     </span>
                     <span className="stats-card">
-                      <Statistic title="Avg. forks/day" value={averagePerDay} precision={2} />
+                      <Statistic title="Avg. pull requests/day" value={averagePerDay} precision={2} />
                     </span>
                     <span className="stats-card">
-                      <Statistic title="Max. forks/day" value={maxIncrement} />
+                      <Statistic title="Max. pull requests/day" value={maxIncrement} />
                     </span>
                   </Row>
                 </Row>
@@ -149,7 +149,7 @@ class Fork extends React.Component {
           yAxis: {
             gridLineWidth: 0,
             title: {
-              text: 'total forks',
+              text: 'total issues',
             },
           },
           series: Array.from(this.state.arr.values()).map(dataArray => dataArray[0]),

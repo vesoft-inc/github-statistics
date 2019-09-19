@@ -372,6 +372,234 @@ class GithubFetcher {
   }
 
   /**
+ * fetch repository low-level data
+ * @param owner owner of the repository
+ * @param name name of the repository
+ * @param onUpdate (data) function that will be called when a new data update is avaiable
+ * @param onFinish (stats) function that will be called when fetching is finished
+ * @param onProgress (progress) function that will be called when progress is updated
+ * @param shouldAbort function that returns a boolean which determines whether fetching should abort
+ * @returns Object that contains statistics
+ */
+  fetchRequestsData = async (owner, name, onUpdate, onFinish, onProgress, shouldAbort) => {
+    const preparationVariables = {
+      owner: owner,
+      name: name,
+    }
+
+    // define the graphql query
+    const preparationQuery = /* GraphQL */ `
+      query prepareForks($owner: String!, $name: String!){
+        repository(owner: $owner, name: $name) {
+          createdAt
+          forkCount
+          pullRequests(first: 0) {
+            totalCount
+          }
+        }
+      }
+    `
+    const query = /* GraphQL */ `
+      query getForks($owner: String!, $name: String!, $previousEndCursor: String){
+        repository(owner: $owner, name: $name) {
+          pullRequests(first: 100, after: $previousEndCursor) {
+            pageInfo {
+              endCursor
+              hasNextPage
+            }
+            nodes {
+              createdAt
+            }
+          }
+        }
+      }
+    `
+
+    // local variables
+    const formattedData = new Map()
+    let pageIndex = 0
+    let totalToFetch = 0
+    let maxIncrement = 0
+    let numberFetched = 0
+    let previousEndCursor = null
+    let hasNextPage = false
+
+    // Preparation query
+    const preparationData = await this.gqlClient.request(preparationQuery, preparationVariables)
+
+    // from preparation
+    totalToFetch = preparationData.repository.pullRequests.totalCount
+    const createdAt = preparationData.repository.createdAt
+
+
+
+    const handleNode = node => {
+      const date = new Date(node.createdAt.slice(0, 10)).getTime() // ISO-8601 encoded UTC date string
+      if (!formattedData.has(date)) {
+        formattedData.set(date, 1)
+      } else {
+        formattedData.set(date, formattedData.get(date) + 1)
+      }
+      if (formattedData.get(date) > maxIncrement) maxIncrement = formattedData.get(date)
+      // update progress tracking
+      numberFetched += 1
+    }
+
+    // data traversal, 100 edges/request
+    do {
+      if (shouldAbort) if (shouldAbort()) return
+
+      const variables = {
+        owner: owner,
+        name: name,
+        previousEndCursor: previousEndCursor
+      }
+      // query for data
+      const data = await this.gqlClient.request(query, variables)
+
+      data.repository.pullRequests.nodes.forEach(handleNode)
+
+      // update progress tracking
+      if (onProgress) onProgress(getProgress(numberFetched, totalToFetch))
+
+      // track loop-level variables
+      previousEndCursor = data.repository.pullRequests.pageInfo.endCursor
+      hasNextPage = data.repository.pullRequests.pageInfo.hasNextPage
+
+      // update pageIndex
+      pageIndex += 1
+
+      // onUpdate callback if existed
+      if (this.liveUpdate && onUpdate && pageIndex % this.pagesPerUpdate === 0) {
+        onUpdate(formattedData)
+      }
+    } while (hasNextPage)
+
+    if (onUpdate) onUpdate(formattedData)
+    if (onFinish) onFinish({
+      total: totalToFetch,
+      maxIncrement,
+      createdAt,
+    })
+
+    return formattedData
+  }
+
+  /**
+ * fetch repository low-level data
+ * @param owner owner of the repository
+ * @param name name of the repository
+ * @param onUpdate (data) function that will be called when a new data update is avaiable
+ * @param onFinish (stats) function that will be called when fetching is finished
+ * @param onProgress (progress) function that will be called when progress is updated
+ * @param shouldAbort function that returns a boolean which determines whether fetching should abort
+ * @returns Object that contains statistics
+ */
+  fetchIssuesData = async (owner, name, onUpdate, onFinish, onProgress, shouldAbort) => {
+    const preparationVariables = {
+      owner: owner,
+      name: name,
+    }
+
+    // define the graphql query
+    const preparationQuery = /* GraphQL */ `
+      query prepareForks($owner: String!, $name: String!){
+        repository(owner: $owner, name: $name) {
+          createdAt
+          forkCount
+          issues(first: 0) {
+            totalCount
+          }
+        }
+      }
+    `
+    const query = /* GraphQL */ `
+      query getForks($owner: String!, $name: String!, $previousEndCursor: String){
+        repository(owner: $owner, name: $name) {
+          issues(first: 100, after: $previousEndCursor) {
+            pageInfo {
+              endCursor
+              hasNextPage
+            }
+            nodes {
+              createdAt
+            }
+          }
+        }
+      }
+    `
+
+    // local variables
+    const formattedData = new Map()
+    let pageIndex = 0
+    let totalToFetch = 0
+    let maxIncrement = 0
+    let numberFetched = 0
+    let previousEndCursor = null
+    let hasNextPage = false
+
+    // Preparation query
+    const preparationData = await this.gqlClient.request(preparationQuery, preparationVariables)
+
+    // from preparation
+    totalToFetch = preparationData.repository.issues.totalCount
+    const createdAt = preparationData.repository.createdAt
+
+
+
+    const handleNode = node => {
+      const date = new Date(node.createdAt.slice(0, 10)).getTime() // ISO-8601 encoded UTC date string
+      if (!formattedData.has(date)) {
+        formattedData.set(date, 1)
+      } else {
+        formattedData.set(date, formattedData.get(date) + 1)
+      }
+      if (formattedData.get(date) > maxIncrement) maxIncrement = formattedData.get(date)
+      // update progress tracking
+      numberFetched += 1
+    }
+
+    // data traversal, 100 edges/request
+    do {
+      if (shouldAbort) if (shouldAbort()) return
+
+      const variables = {
+        owner: owner,
+        name: name,
+        previousEndCursor: previousEndCursor
+      }
+      // query for data
+      const data = await this.gqlClient.request(query, variables)
+
+      data.repository.issues.nodes.forEach(handleNode)
+
+      // update progress tracking
+      if (onProgress) onProgress(getProgress(numberFetched, totalToFetch))
+
+      // track loop-level variables
+      previousEndCursor = data.repository.issues.pageInfo.endCursor
+      hasNextPage = data.repository.issues.pageInfo.hasNextPage
+
+      // update pageIndex
+      pageIndex += 1
+
+      // onUpdate callback if existed
+      if (this.liveUpdate && onUpdate && pageIndex % this.pagesPerUpdate === 0) {
+        onUpdate(formattedData)
+      }
+    } while (hasNextPage)
+
+    if (onUpdate) onUpdate(formattedData)
+    if (onFinish) onFinish({
+      total: totalToFetch,
+      maxIncrement,
+      createdAt,
+    })
+
+    return formattedData
+  }
+
+  /**
    * fetch repository low-level data
    * @param owner owner of the repository
    * @param name name of the repository

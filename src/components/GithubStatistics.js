@@ -243,6 +243,16 @@ class GithubStatistics extends React.Component {
               repos={repos}
               deleteRepo={deleteRepo}
             />
+            <DataSection
+              type={TYPES.ISSUES}
+              repos={repos}
+              deleteRepo={deleteRepo}
+            />
+            <DataSection
+              type={TYPES.PULLREQUESTS}
+              repos={repos}
+              deleteRepo={deleteRepo}
+            />
           </div>
         </div>
 
