@@ -18,19 +18,23 @@ class Fork extends React.Component {
       arr: []
     }
   }
+
   static formatter = (repo, data) => {
-    // fprk total data, index 0
+    // issues total data, index 0
     let total = { name: repo, data: [] }
-    // fork  daily increment data, index 1
+    // issues  daily increment data, index 1
     let increment = { name: repo, data: [] }
-
     let cumulativeCount = 0
-    data.forEach((value, key) => {
-      cumulativeCount += value
-      total.data.push([key, cumulativeCount])
-      increment.data.push([key, value])
+    let arrayObj = Array.from(data);
+    arrayObj.sort(function (a, b) {
+      return a[0] - b[0];
     })
-
+    arrayObj.forEach((value, key) => {
+      cumulativeCount += value[1]
+      total.data.push([value[0], cumulativeCount])
+      
+      increment.data.push([value[0], value])
+    })
     return [total, increment]
   }
 
@@ -96,7 +100,7 @@ class Fork extends React.Component {
                   </Tag>
                   <Row type="flex" align="middle" justify="space-between">
                     <span className="stats-card">
-                      <Statistic title="Total issues" value={total} prefix={<Icon type="fork" />} />
+                      <Statistic title="Total issues" value={total} prefix={<Icon type="info-circle" />} />
                     </span>
                     <span className="stats-card">
                       <Statistic title="Avg. issues/day" value={averagePerDay} precision={2} />

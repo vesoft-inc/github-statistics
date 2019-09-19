@@ -96,7 +96,7 @@ class Fork extends React.Component {
                   </Tag>
                   <Row type="flex" align="middle" justify="space-between">
                     <span className="stats-card">
-                      <Statistic title="Total pull requests" value={total} prefix={<Icon type="fork" />} />
+                      <Statistic title="Total pull requests" value={total} prefix={<Icon type="pull-request" />} />
                     </span>
                     <span className="stats-card">
                       <Statistic title="Avg. pull requests/day" value={averagePerDay} precision={2} />
@@ -149,7 +149,7 @@ class Fork extends React.Component {
           yAxis: {
             gridLineWidth: 0,
             title: {
-              text: 'total issues',
+              text: 'total pull requests',
             },
           },
           series: Array.from(this.state.arr.values()).map(dataArray => dataArray[0]),
