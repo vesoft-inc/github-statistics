@@ -1,17 +1,17 @@
 {
   "files": {
-    "main.css": "/github-statistics/static/css/main.af5ab09f.chunk.css",
-    "main.js": "/github-statistics/static/js/main.c305b3f5.chunk.js",
-    "main.js.map": "/github-statistics/static/js/main.c305b3f5.chunk.js.map",
+    "main.css": "/github-statistics/static/css/main.d1eb3685.chunk.css",
+    "main.js": "/github-statistics/static/js/main.5df5ae9e.chunk.js",
+    "main.js.map": "/github-statistics/static/js/main.5df5ae9e.chunk.js.map",
     "runtime~main.js": "/github-statistics/static/js/runtime~main.9181d6dc.js",
     "runtime~main.js.map": "/github-statistics/static/js/runtime~main.9181d6dc.js.map",
     "static/css/2.9692cc1a.chunk.css": "/github-statistics/static/css/2.9692cc1a.chunk.css",
     "static/js/2.6b5b64e5.chunk.js": "/github-statistics/static/js/2.6b5b64e5.chunk.js",
     "static/js/2.6b5b64e5.chunk.js.map": "/github-statistics/static/js/2.6b5b64e5.chunk.js.map",
     "index.html": "/github-statistics/index.html",
-    "precache-manifest.bbf901ea2368f9169ebd0469fb9f2a77.js": "/github-statistics/precache-manifest.bbf901ea2368f9169ebd0469fb9f2a77.js",
+    "precache-manifest.430218588eb25a4fdc447ba8ce0c004e.js": "/github-statistics/precache-manifest.430218588eb25a4fdc447ba8ce0c004e.js",
     "service-worker.js": "/github-statistics/service-worker.js",
     "static/css/2.9692cc1a.chunk.css.map": "/github-statistics/static/css/2.9692cc1a.chunk.css.map",
-    "static/css/main.af5ab09f.chunk.css.map": "/github-statistics/static/css/main.af5ab09f.chunk.css.map"
+    "static/css/main.d1eb3685.chunk.css.map": "/github-statistics/static/css/main.d1eb3685.chunk.css.map"
   }
 }
