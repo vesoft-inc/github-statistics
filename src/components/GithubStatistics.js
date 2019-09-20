@@ -13,7 +13,7 @@ import DataSection from './DataSection'
 import GithubFetcher from '../scripts/GithubFetcher'
 
 import { updateState } from '../actions'
-
+import logo from '../image/logo.png'
 // const CENTER_FLEX = { display: 'flex', placeContent: 'center' }
 // const CENTER_LEFT_FLEX = { display: 'flex', justifyContent: 'flex-start', alignContent: 'center'}
 
@@ -191,7 +191,7 @@ class GithubStatistics extends React.Component {
         <header className="header">
           <Row type="flex" align="middle">
             <Col className="header-section">
-              <a className="header-title" href="/">
+              <a className="header-title" href="https://github.com/vesoft-inc/github-statistics" target="_blank">
                 Github Stats
               </a>
             </Col>
@@ -203,6 +203,9 @@ class GithubStatistics extends React.Component {
               {this._renderTags()}
             </Col>
           </Row>
+          <a href="https://vesoft.com/" target="_blank">
+            <img src={logo} alt="" className="header-logo" />
+          </a>
         </header>
         <div className="container">
           <div className="sider">
@@ -212,7 +215,6 @@ class GithubStatistics extends React.Component {
               ))}
             </Anchor>
           </div>
-
           <div className="content" >
             <DataSection
               type={TYPES.REPO}

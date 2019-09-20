@@ -1,15 +1,17 @@
 @import '~antd/dist/antd.css';
 
 .header {
-  position: relative;
+  position: fixed;
   width: 100%;
   background-color: #FFFFFF;
   z-index: 10;
   padding: 12px 2%; 
   box-shadow: 0 2px 8px #f0f1f2;
+  /* border-bottom: 1px solid #999999 */
 }
 
 .container {
+  padding-top:60px;
   display: flex;
   flex-direction: row;
   margin: 0 2%; 
@@ -65,6 +67,15 @@
 .header-section {
   margin: auto 12px;
   padding: 2px 0px;
+}
+
+.header-logo{
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: 180px;
+  height: 65px;
+  z-index: 99;
 }
 
 .header-input {
