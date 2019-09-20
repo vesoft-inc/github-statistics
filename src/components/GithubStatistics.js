@@ -192,7 +192,7 @@ class GithubStatistics extends React.Component {
           <Row type="flex" align="middle">
             <Col className="header-section">
               <a className="header-title" href="https://github.com/vesoft-inc/github-statistics" target="_blank">
-                Github Stats
+                GitHub Stats
               </a>
             </Col>
             <iframe src="https://ghbtns.com/github-btn.html?user=vesoft-inc&repo=github-statistics&type=star&count=true" frameBorder="0" scrolling="0" width="100px" height="20px" />

@@ -10,5 +10,5 @@ export default {
   COMMIT: 'Commit',
   RELEASE: 'Release',
   ISSUES: 'Issues',
-  PULLREQUESTS: 'Pull requests',
+  PULLREQUESTS: 'Pull Requests',
 }
