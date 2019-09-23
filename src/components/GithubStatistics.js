@@ -209,7 +209,7 @@ class GithubStatistics extends React.Component {
         </header>
         <div className="container">
           <div className="sider">
-            <Anchor bounds={0} className="anchor">
+            <Anchor bounds={0} className="anchor" offsetTop={70}>
               {Object.values(TYPES).map(value => (
                 <Anchor.Link key={`anchor-link-${value}`} title={value} href={`#${value}`}/>
               ))}
