@@ -151,7 +151,7 @@ class GithubStatistics extends React.Component {
         <Select
           className="header-input"
           value={input}
-          placeholder="search by repository"
+          placeholder="vesoft-inc/github-statistics"
           defaultActiveFirstOption={false}
           onChange={input => {
             this.setState({ input })

@@ -187,6 +187,11 @@ class DataSection extends React.Component {
       <Button
         icon="cloud-download"
         type="link"
+        type="primary"
+        style={{
+          fontSize: '18px',
+          lineHeight: '100%'
+        }}
         disabled={repos.length === 0}
         onClick={() => {
           this.setState({ loading: true })
