@@ -203,7 +203,7 @@ class GithubStatistics extends React.Component {
               {this._renderTags()}
             </Col>
           </Row>
-          <a href="https://vesoft.com/" target="_blank">
+          <a href="https://github.com/vesoft-inc/nebula" _target="_blank">
             <img src={logo} alt="" className="header-logo" />
           </a>
         </header>
