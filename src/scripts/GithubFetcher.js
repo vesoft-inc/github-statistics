@@ -168,7 +168,7 @@ class GithubFetcher {
       query prepareStargazers($owner: String!, $name: String!){
         repository(owner: $owner, name: $name) {
           createdAt
-          stargazers(first: 0) {
+          stargazers(first: 100) {
             totalCount
           }
         }
@@ -228,7 +228,10 @@ class GithubFetcher {
         previousEndCursor: previousEndCursor
       }
       // query for data
-      const data = await this.gqlClient.request(query, variables)
+      const data = await new Promise(resolve => {
+        const _data = this.gqlClient.request(query, variables)
+        setTimeout(() => resolve(_data), 255)
+      })
 
       data.repository.stargazers.edges.forEach(handleEdge)
 
@@ -240,20 +243,17 @@ class GithubFetcher {
       hasNextPage = data.repository.stargazers.pageInfo.hasNextPage
       // update pageIndex
       pageIndex += 1
-
       // onUpdate callback if existed
       if (this.liveUpdate && onUpdate && pageIndex % this.pagesPerUpdate === 0) {
         onUpdate(formattedData)
       }
     } while (hasNextPage)
-
     if (onUpdate) onUpdate(formattedData)
     if (onFinish) onFinish({
       total: totalToFetch,
       maxIncrement,
       createdAt,
     })
-
     return formattedData
   }
 
@@ -316,7 +316,7 @@ class GithubFetcher {
     // from preparation
     totalToFetch = preparationData.repository.forks.totalCount
     const createdAt = preparationData.repository.createdAt
-    
+
 
 
     const handleNode = node => {

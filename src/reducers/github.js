@@ -11,7 +11,7 @@ const INITIAL_STATE = {
   releaseData: [],
   releaseStats: {},
 
-  githubApiToken: '05c1acf261f6b223411c73d8b71cb1a30ce9186a',
+  githubApiToken: '57e59912e2d247e54c8d1c8ec735cab134d1a206',
 
 }
 
