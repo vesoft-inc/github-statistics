@@ -35,9 +35,9 @@ class GithubStatistics extends React.Component {
       deleteRepo: '',
     }
 
-    this.fetcher = new GithubFetcher('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')
+    this.fetcher = new GithubFetcher('Z2hwX29XQWdNS3gxeXNHRXBlTzV6OEdpdWZvNjc0WkhWZTN0bVlJVQ==')
 
-    this.props.updateState("githubApiToken", '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')
+    this.props.updateState("githubApiToken", 'Z2hwX29XQWdNS3gxeXNHRXBlTzV6OEdpdWZvNjc0WkhWZTN0bVlJVQ==')
 
     this.search = _.debounce(
       this.fetcher.searchRepository,
@@ -118,7 +118,7 @@ class GithubStatistics extends React.Component {
 
   _renderHeaderInput = () => {
     const { repos, input, testingRepo, suggestions } = this.state
-    console.log('repos', repos)
+
     // const format = /^[a-z\d](?:[a-z\d]|-(?=[a-z\d])){0,38}\/{1}[a-z\d](?:[a-z\d]|-(?=[a-z\d])){0,38}$/i
     let hintMessage = ''
 
