@@ -4,21 +4,21 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@material-ui/core": "^4.3.3",
-    "antd": "^3.22.0",
-    "gh-pages": "^2.1.1",
-    "graphql": "^14.5.0",
+    "@material-ui/core": "^4.11.4",
+    "antd": "^3.26.20",
+    "gh-pages": "^2.2.0",
+    "graphql": "^14.7.0",
     "graphql-request": "^1.8.2",
-    "highcharts": "^7.2.0",
+    "highcharts": "^9.1.1",
     "highcharts-react-official": "^2.2.2",
-    "lodash": "^4.17.15",
-    "moment": "^2.24.0",
-    "react": "^16.9.0",
-    "react-dom": "^16.9.0",
-    "react-redux": "^7.1.1",
+    "lodash": "^4.17.21",
+    "moment": "^2.29.1",
+    "react": "^16.14.0",
+    "react-dom": "^16.14.0",
+    "react-redux": "^7.2.4",
     "react-scripts": "3.1.1",
-    "recharts": "^1.7.1",
-    "redux": "^4.0.4"
+    "recharts": "^1.8.5",
+    "redux": "^4.1.0"
   },
   "scripts": {
     "predeploy": "npm run build",
@@ -44,8 +44,8 @@
     ]
   },
   "devDependencies": {
-    "eslint": "^6.2.2",
-    "eslint-plugin-react": "^7.14.3",
-    "redux-devtools": "^3.5.0"
+    "eslint": "^6.8.0",
+    "eslint-plugin-react": "^7.24.0",
+    "redux-devtools": "^3.7.0"
   }
 }
