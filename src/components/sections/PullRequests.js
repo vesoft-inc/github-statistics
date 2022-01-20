@@ -168,7 +168,7 @@ class Fork extends React.Component {
           yAxis: {
             gridLineWidth: 0,
             title: {
-              text: 'fork increment/day',
+              text: 'pull request increment/day',
             },
           },
           series: Array.from(data.values()).map(dataArray => dataArray[1]),
