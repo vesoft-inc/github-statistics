@@ -1,7 +1,7 @@
 const ObjectToCsv = require('objects-to-csv');
 const axios = require('axios');
 
-const token = 'token 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' // Enter your Github token
+const token = 'token ' // Enter your Github token
 
 const repos = [
     {
