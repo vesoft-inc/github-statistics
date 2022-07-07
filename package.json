@@ -13,7 +13,7 @@
     "highcharts": "^9.1.1",
     "highcharts-react-official": "^2.2.2",
     "lodash": "^4.17.21",
-    "moment": "^2.29.1",
+    "moment": "^2.29.4",
     "objects-to-csv": "^1.3.6",
     "react": "^16.14.0",
     "react-dom": "^16.14.0",
