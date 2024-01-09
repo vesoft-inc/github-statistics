@@ -41,9 +41,11 @@ Feature requests are also warmly welcomed.
 
 # Development
 
-First `git clone` and `npm -i` to set up the enviroment.
+1. `git clone` and `npm -i` to set up the enviroment.
 
-`npm start`
+2. set `YOUR_GITHUB_API_TOKEN` in the [.env](./.env) file.
+
+3. `npm start`
 
 Runs the app in the development mode.<br>
 Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
