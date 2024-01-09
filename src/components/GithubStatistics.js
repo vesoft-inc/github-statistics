@@ -22,6 +22,8 @@ import logo from '../image/logo.png'
 //   duration: 2,
 //   maxCount: 5,
 // })
+/* eslint-disable-next-line */
+const GITHUB_API_TOKEN = process.env.REACT_APP_GITHUB_API_TOKEN
 
 class GithubStatistics extends React.Component {
   constructor(props) {
@@ -35,9 +37,12 @@ class GithubStatistics extends React.Component {
       deleteRepo: '',
     }
 
-    this.fetcher = new GithubFetcher('Z2hwX29XQWdNS3gxeXNHRXBlTzV6OEdpdWZvNjc0WkhWZTN0bVlJVQ==')
 
-    this.props.updateState("githubApiToken", 'Z2hwX29XQWdNS3gxeXNHRXBlTzV6OEdpdWZvNjc0WkhWZTN0bVlJVQ==')
+    /* eslint-disable-next-line */
+    var t = btoa(GITHUB_API_TOKEN)
+    /* eslint-disable-next-line */
+    this.fetcher = new GithubFetcher(btoa(t))
+    this.props.updateState("githubApiToken", t)
 
     this.search = _.debounce(
       this.fetcher.searchRepository,
@@ -191,7 +196,7 @@ class GithubStatistics extends React.Component {
         <header className="header">
           <Row type="flex" align="middle">
             <Col className="header-section">
-              <a className="header-title" href="https://github.com/vesoft-inc/github-statistics" target="_blank">
+              <a className="header-title" href="https://github.com/vesoft-inc/github-statistics" target="_blank" rel="noreferrer">
                 GitHub Stats
               </a>
             </Col>
