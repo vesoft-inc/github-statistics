@@ -41,7 +41,7 @@ class GithubStatistics extends React.Component {
     /* eslint-disable-next-line */
     var t = btoa(GITHUB_API_TOKEN)
     /* eslint-disable-next-line */
-    this.fetcher = new GithubFetcher(btoa(t))
+    this.fetcher = new GithubFetcher(t)
     this.props.updateState("githubApiToken", t)
 
     this.search = _.debounce(
