@@ -1,10 +1,7 @@
-
 ---
-
 <p align="center" >
-  <strong>GitHub Statistics</strong>
+<strong>GitHub Statistics</strong>
 </p>
-
 ---
 
 ![trynow](https://img.shields.io/badge/TRY-NOW-green?url=https://vesoft-inc.github.io/github-statistics/)
@@ -23,7 +20,7 @@
 
 ![Image of Yaktocat](/src/image/WX20190912-173245.png)
 
-# Features (WIP)
+# Features
 
 - [x] Repository overview
 - [x] Star history
@@ -41,18 +38,32 @@ Feature requests are also warmly welcomed.
 
 # Development
 
-1. `git clone` and `npm -i` to set up the enviroment.
+1. clone repo.
 
-2. set `YOUR_GITHUB_API_TOKEN` in the [.env](./.env) file.
+```shell
+git clone https://github.com/vesoft-inc/github-statistics.git
+```
 
-3. `npm start`
+2. install npm modules.
 
-Runs the app in the development mode.<br>
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+```shell
+cd github-statistics
+npm install
+```
 
-`npm run build`
+3. **MUST SET** `YOUR_GITHUB_API_TOKEN` in the [.env](./.env) file. Read [Creating a personal access token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens) to create token if you don't have one.
 
-Builds the app for production to the `build` folder.<br>
+4. runs the app in the development mode, open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+
+```shell
+npm start
+```
+
+Build the app for production to the `build` folder.<br>
+
+```shell
+npm run build
+```
 
 ---
 
